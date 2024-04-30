@@ -1,71 +1,108 @@
 #include "MainFrame.h"
-#include "Manipulation.h"
 
-MainFrame::MainFrame(const wxString& title)
-        : wxFrame(NULL, wxID_ANY, title),
-          lateralPanel(new wxPanel(this, wxID_ANY)),
-          buttonSizer(new wxBoxSizer(wxVERTICAL)),
-          textSizer(new wxBoxSizer(wxVERTICAL)),
-          infoText(new wxStaticText(lateralPanel, wxID_ANY, wxT("")))
+MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title)
 {
-    wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
 
-    std::string imgSrc = "images/IMG_0067.jpg";
-    cv::Mat mat = cv::imread(imgSrc, cv::IMREAD_COLOR);
-
-    if (mat.empty())
-    {
-        wxLogError("Cannot load the image file.");
-        return;
-    }
-
-    image = MatToWxImage(mat);
-
-    int width = GetSize().GetWidth();
-    int height = GetSize().GetHeight();
-    double scaleFactor = std::min((double)width / image.GetWidth(), (double)height / image.GetHeight());
-    int newWidth = image.GetWidth() * scaleFactor;
-    int newHeight = image.GetHeight() * scaleFactor;
-    image.Rescale(newWidth, newHeight, wxIMAGE_QUALITY_HIGH);
-
-    bitmap = new wxStaticBitmap(this, wxID_ANY, wxBitmap(image));
-    sizer->Add(bitmap, 1, wxALL | wxEXPAND, 5);
+    lateralPanel = new wxPanel(this, wxID_ANY);
+    lateralSizer = new wxBoxSizer(wxVERTICAL);
+    lateralPanel->SetSizer(lateralSizer);
 
     wxButton* button1 = new wxButton(lateralPanel, wxID_ANY, wxT("Button 1"));
     wxButton* button2 = new wxButton(lateralPanel, wxID_ANY, wxT("Button 2"));
     wxButton* button3 = new wxButton(lateralPanel, wxID_ANY, wxT("Button 3"));
 
+    lateralSizer->Add(button1, 0, wxALL, 5);
+    lateralSizer->Add(button2, 0, wxALL, 5);
+    lateralSizer->Add(button3, 0, wxALL, 5);
 
-    buttonSizer->Add(button1, 0, wxALL, 5);
-    buttonSizer->Add(button2, 0, wxALL, 5);
-    buttonSizer->Add(button3, 0, wxALL, 5);
+    HideLayout();
 
-    textSizer->Add(infoText, 0, wxALL, 5);
+    button1->Bind(wxEVT_BUTTON, &MainFrame::OnButton1Click, this);
+    button2->Bind(wxEVT_BUTTON, &MainFrame::OnButton2Click, this);
+    button3->Bind(wxEVT_BUTTON, &MainFrame::OnButton3Click, this);
 
-    wxBoxSizer* lateralSizer = new wxBoxSizer(wxVERTICAL);
-    lateralSizer->Add(buttonSizer, 1, wxEXPAND);
-    lateralSizer->Add(textSizer, 0, wxEXPAND);
-
-    lateralPanel->SetSizer(lateralSizer);
-
-    mainSizer = new wxBoxSizer(wxHORIZONTAL);
-    mainSizer->Add(sizer, 1, wxEXPAND);
+    wxBoxSizer* mainSizer = new wxBoxSizer(wxHORIZONTAL);
+    mainSizer->AddStretchSpacer();
     mainSizer->Add(lateralPanel, 0, wxEXPAND);
 
     SetSizer(mainSizer);
     Layout();
-
-    button1->Bind(wxEVT_BUTTON, &MainFrame::OnButtonClick, this);
-    button2->Bind(wxEVT_BUTTON, &MainFrame::OnButtonClick, this);
-    button3->Bind(wxEVT_BUTTON, &MainFrame::OnButtonClick, this);
 }
 
-void MainFrame::OnButtonClick(wxCommandEvent& event)
+wxBoxSizer* MainFrame::CreateLayout1()
 {
-    wxButton* button = dynamic_cast<wxButton*>(event.GetEventObject());
-    if (button)
+    wxBoxSizer* layout = new wxBoxSizer(wxVERTICAL);
+
+    wxTextCtrl* intInput1 = new wxTextCtrl(this, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, 0, wxTextValidator(wxFILTER_NUMERIC));
+    wxTextCtrl* intInput2 = new wxTextCtrl(this, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, 0, wxTextValidator(wxFILTER_NUMERIC));
+    wxButton* validateButton = new wxButton(this, wxID_ANY, wxT("Validate"));
+
+    layout->Add(intInput1, 0, wxALL, 5);
+    layout->Add(intInput2, 0, wxALL, 5);
+    layout->Add(validateButton, 0, wxALL, 5);
+
+    return layout;
+}
+
+wxBoxSizer* MainFrame::CreateLayout2()
+{
+    wxBoxSizer* layout = new wxBoxSizer(wxVERTICAL);
+
+    wxTextCtrl* textInput1 = new wxTextCtrl(lateralPanel, wxID_ANY, wxT(""));
+    wxButton* validateButton = new wxButton(lateralPanel, wxID_ANY, wxT("Validate"));
+
+    layout->Add(textInput1, 0, wxALL, 5);
+    layout->Add(validateButton, 0, wxALL, 5);
+
+    return layout;
+}
+
+wxBoxSizer* MainFrame::CreateLayout3()
+{
+    wxBoxSizer* layout = new wxBoxSizer(wxVERTICAL);
+
+    wxTextCtrl* textInput1 = new wxTextCtrl(lateralPanel, wxID_ANY, wxT("1"));
+    wxTextCtrl* textInput2 = new wxTextCtrl(lateralPanel, wxID_ANY, wxT("2"));
+    wxButton* validateButton = new wxButton(lateralPanel, wxID_ANY, wxT("Validate"));
+
+    layout->Add(textInput1, 0, wxALL, 5);
+    layout->Add(textInput2, 0, wxALL, 5);
+    layout->Add(validateButton, 0, wxALL, 5);
+
+    return layout;
+}
+
+void MainFrame::OnButton1Click(wxCommandEvent& event)
+{
+    ShowLayout(CreateLayout1());
+}
+
+void MainFrame::OnButton2Click(wxCommandEvent& event)
+{
+    ShowLayout(CreateLayout2());
+}
+
+void MainFrame::OnButton3Click(wxCommandEvent& event)
+{
+    ShowLayout(CreateLayout3());
+}
+
+void MainFrame::ShowLayout(wxBoxSizer* layout)
+{
+    HideLayout();
+    lateralPanel->SetSizer(layout);
+    lateralPanel->Layout();
+}
+
+void MainFrame::HideLayout()
+{
+    if (lateralSizer->GetItemCount() > 3)
     {
-        infoText->SetLabel(button->GetLabelText() + wxT(" was clicked!"));
+        wxSizerItem* item = lateralSizer->GetItem(3);
+        wxSizer* layout = item->GetSizer();
+        lateralSizer->Remove(3);
+        layout->Clear(true);
+        delete layout;
+        lateralPanel->Layout();
     }
 }
-

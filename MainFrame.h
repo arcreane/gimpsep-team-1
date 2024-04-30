@@ -2,8 +2,6 @@
 #define MAIN_FRAME_H
 
 #include <wx/wx.h>
-#include <opencv2/opencv.hpp>
-#include <wx/image.h>
 
 class MainFrame : public wxFrame
 {
@@ -11,15 +9,19 @@ public:
     MainFrame(const wxString& title);
 
 private:
-    wxImage image;
-    wxStaticBitmap* bitmap;
-    wxBoxSizer* mainSizer;
     wxPanel* lateralPanel;
-    wxBoxSizer* buttonSizer;
-    wxBoxSizer* textSizer;
-    wxStaticText* infoText;
+    wxBoxSizer* lateralSizer;
 
-    void OnButtonClick(wxCommandEvent& event);
+    void OnButton1Click(wxCommandEvent& event);
+    void OnButton2Click(wxCommandEvent& event);
+    void OnButton3Click(wxCommandEvent& event);
+
+    wxBoxSizer* CreateLayout1();
+    wxBoxSizer* CreateLayout2();
+    wxBoxSizer* CreateLayout3();
+
+    void ShowLayout(wxBoxSizer* layout);
+    void HideLayout();
 };
 
 #endif // MAIN_FRAME_H
