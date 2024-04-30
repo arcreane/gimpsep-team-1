@@ -13,14 +13,17 @@ if(OpenCV_FOUND)
     message("OpenCV found")
 endif()
 
-
 include_directories(${OpenCV_INCLUDE_DIRS})
 
 add_executable(gimpsep_team_1 main.cpp)
 
-target_link_libraries(gimpsep_team_1 PRIVATE opencv_ml opencv_dnn opencv_core opencv_flann)
-target_link_libraries(gimpsep_team_1 PRIVATE wx::core wx::base)
+target_link_libraries(gimpsep_team_1 PRIVATE wx::core wx::base ${OpenCV_LIBS})
 
-set_target_properties(${PROJECT_NAME} PROPERTIES
-        LINK_FLAGS /SUBSYSTEM:WINDOWS
-)
+set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS /SUBSYSTEM:WINDOWS)
+
+set(RESOURCE_FOLDER_SRC "${CMAKE_SOURCE_DIR}/images")
+set(RESOURCE_FOLDER_DEST "${CMAKE_BINARY_DIR}/images")
+
+file(MAKE_DIRECTORY ${RESOURCE_FOLDER_DEST})
+file(GLOB RESOURCE_FILES "${RESOURCE_FOLDER_SRC}/*" "${CMAKE_SOURCE_DIR}/images/*")
+file(COPY ${RESOURCE_FILES} DESTINATION ${RESOURCE_FOLDER_DEST})

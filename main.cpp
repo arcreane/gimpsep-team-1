@@ -1,71 +1,97 @@
-
-#include <wx/wxprec.h>
-#ifndef WX_PRECOMP
 #include <wx/wx.h>
-#endif
+#include <opencv2/opencv.hpp>
+#include <fstream>
+
+wxImage MatToWxImage(const cv::Mat& mat)
+{
+    wxImage img(mat.cols, mat.rows);
+
+    if (mat.channels() == 3)
+    {
+        for (int y = 0; y < mat.rows; y++)
+        {
+            const uchar* matRow = mat.ptr<uchar>(y);
+            uchar* imgRow = img.GetData() + y * img.GetWidth() * 3;
+            memcpy(imgRow, matRow, mat.cols * 3);
+        }
+    }
+    else if (mat.channels() == 1)
+    {
+        cv::Mat mat3;
+        cv::cvtColor(mat, mat3, cv::COLOR_GRAY2BGR);
+
+        for (int y = 0; y < mat3.rows; y++)
+        {
+            const uchar* matRow = mat3.ptr<uchar>(y);
+            uchar* imgRow = img.GetData() + y * img.GetWidth() * 3;
+            memcpy(imgRow, matRow, mat3.cols * 3);
+        }
+    }
+    return img;
+}
+
 
 class MyApp: public wxApp
 {
 public:
     virtual bool OnInit();
 };
+
 class MyFrame: public wxFrame
 {
 public:
-    MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size);
-private:
-    void OnHello(wxCommandEvent& event);
-    void OnExit(wxCommandEvent& event);
-    void OnAbout(wxCommandEvent& event);
-wxDECLARE_EVENT_TABLE();
-};
-enum
-{
-    ID_Hello = 1
-};
-wxBEGIN_EVENT_TABLE(MyFrame, wxFrame)
-                EVT_MENU(ID_Hello,   MyFrame::OnHello)
-                EVT_MENU(wxID_EXIT,  MyFrame::OnExit)
-                EVT_MENU(wxID_ABOUT, MyFrame::OnAbout)
-wxEND_EVENT_TABLE();
-wxIMPLEMENT_APP(MyApp);
+    MyFrame(const wxString& title);
 
+private:
+    wxImage image;
+    wxStaticBitmap* bitmap;
+};
+
+wxIMPLEMENT_APP(MyApp);
 
 bool MyApp::OnInit()
 {
-    MyFrame *frame = new MyFrame( "Hello World", wxPoint(50, 50), wxSize(450, 340) );
-    frame->Show( true );
+    MyFrame *frame = new MyFrame("Hello World");
+    frame->Show(true);
     return true;
 }
-MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
-        : wxFrame(NULL, wxID_ANY, title, pos, size)
+
+MyFrame::MyFrame(const wxString& title)
+        : wxFrame(NULL, wxID_ANY, title)
 {
-    wxMenu *menuFile = new wxMenu;
-    menuFile->Append(ID_Hello, "&Hello...\tCtrl-H",
-                     "Help string shown in status bar for this menu item");
-    menuFile->AppendSeparator();
-    menuFile->Append(wxID_EXIT);
-    wxMenu *menuHelp = new wxMenu;
-    menuHelp->Append(wxID_ABOUT);
-    wxMenuBar *menuBar = new wxMenuBar;
-    menuBar->Append( menuFile, "&File" );
-    menuBar->Append( menuHelp, "&Help" );
-    SetMenuBar( menuBar );
-    CreateStatusBar();
-    SetStatusText( "Welcome to wxWidgets!" );
+    wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+
+    std::string imgSrc = "images/IMG_0067.jpg";
+
+    cv::Mat mat = cv::imread(imgSrc, cv::IMREAD_COLOR);
+
+    if (mat.empty())
+    {
+        wxLogError("Cannot load the image file.");
+        return;
+    }
+
+    image = MatToWxImage(mat);
+
+    int width = GetSize().GetWidth();
+    int height = GetSize().GetHeight();
+    double scaleFactor = std::min((double)width / image.GetWidth(), (double)height / image.GetHeight());
+    int newWidth = image.GetWidth() * scaleFactor;
+    int newHeight = image.GetHeight() * scaleFactor;
+    image.Rescale(newWidth, newHeight, wxIMAGE_QUALITY_HIGH);
+
+    bitmap = new wxStaticBitmap(this, wxID_ANY, wxBitmap(image));
+    sizer->Add(bitmap, 1, wxALL | wxEXPAND, 5);
+
+    SetSizer(sizer);
+    Layout();
+}
 
 
-}
-void MyFrame::OnExit(wxCommandEvent& event)
+
+int main()
 {
-    Close( true );
-}
-void MyFrame::OnAbout(wxCommandEvent& event)
-{
-    wxMessageBox( "This is a wxWidgets' Hello world sample",
-                  "About Hello World", wxOK | wxICON_INFORMATION );
-}
-void MyFrame::OnHello(wxCommandEvent& event)
-{
-    wxLogMessage("Hello world from wxWidgets!");
+    MyApp app;
+    app.MainLoop();
+    return 0;
 }
