@@ -5,6 +5,7 @@
 #ifndef GIMPSEP_TEAM_1_GIMPFRAME_H
 #define GIMPSEP_TEAM_1_GIMPFRAME_H
 
+#include <opencv2/core/mat.hpp>
 #include "wx/wx.h"
 
 class GimpFrame : public wxFrame {
@@ -13,13 +14,17 @@ public:
 private:
     wxPanel* leftPanel;
     wxPanel* rightPanel;
+    wxBoxSizer* rightPanSizer;
     wxPanel* submenuPanel;
+
+    wxStaticBitmap* bitmap;
+    cv::Mat mainImageMat;
+
+    void OnLoadImage(wxCommandEvent& event);
 
     wxGridSizer* CreateButtonGrid();
 
-    void OnButton1Clicked(wxCommandEvent& event);
-    void OnButton2Clicked(wxCommandEvent& event);
-    void OnButton3Clicked(wxCommandEvent& event);
+    void OnButtonClicked(wxCommandEvent& event, int buttonId);
 
     void CreateSubmenu1();
     void CreateSubmenu2();
