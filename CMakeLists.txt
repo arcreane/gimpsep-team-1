@@ -18,7 +18,9 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 add_executable(gimpsep_team_1 main.cpp
         Manipulation.cpp
         MainFrame.cpp
-        Manipulation.h)
+        Manipulation.h
+        GimpFrame.cpp
+        GimpFrame.h)
 
 target_link_libraries(gimpsep_team_1 PRIVATE wx::core wx::base ${OpenCV_LIBS})
 
