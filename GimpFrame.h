@@ -32,6 +32,7 @@ private:
     void CreateSubmenu3();
 
 
+    void OnApplyLightenDarken(bool lighten, bool darken, int factor);
 };
 
 

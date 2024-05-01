@@ -7,7 +7,11 @@
 #include "GimpFrame.h"
 #include "Manipulation.h"
 
-GimpFrame::GimpFrame(const wxString &title) : wxFrame(nullptr, wxID_ANY, title,  wxDefaultPosition, wxSize(1200, 600)) {
+GimpFrame::GimpFrame(const wxString &title) : wxFrame(nullptr,
+                                                      wxID_ANY, title,
+                                                      wxDefaultPosition,
+                                                      wxSize(1200, 600),
+                                                      wxDEFAULT_FRAME_STYLE & ~wxRESIZE_BORDER) {
 
     wxBoxSizer* mainSizer = new wxBoxSizer(wxHORIZONTAL);
 
@@ -115,14 +119,58 @@ void GimpFrame::CreateSubmenu1() {
 
     submenuPanel->DestroyChildren();
 
-    wxStaticText* text = new wxStaticText(submenuPanel, wxID_ANY, wxT("This is submenu 1"));
+    wxStaticText* text = new wxStaticText(submenuPanel, wxID_ANY, wxT("Lighten / Darken submenu"));
+    wxCheckBox* lightenCheckBox = new wxCheckBox(submenuPanel, wxID_ANY, wxT("Lighten"));
+    wxCheckBox* darkenCheckBox = new wxCheckBox(submenuPanel, wxID_ANY, wxT("Darken"));
+    wxSlider* factorSlider = new wxSlider(submenuPanel, wxID_ANY, 0, 0, 255);
+    wxStaticText* factorLabel = new wxStaticText(submenuPanel, wxID_ANY, wxT("0"));
+    wxButton* applyButton = new wxButton(submenuPanel, wxID_ANY, wxT("Apply"));
+    wxButton* decreaseButton = new wxButton(submenuPanel, wxID_ANY, wxT("-"));
+    wxButton* increaseButton = new wxButton(submenuPanel, wxID_ANY, wxT("+"));
 
     wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
     sizer->Add(text, 0, wxALL, 5);
+    sizer->Add(lightenCheckBox, 0, wxALL, 5);
+    sizer->Add(darkenCheckBox, 0, wxALL, 5);
+    wxBoxSizer* factorSizer = new wxBoxSizer(wxHORIZONTAL);
+    const int buttonWidth = 30;
+    decreaseButton->SetMinSize(wxSize(buttonWidth, -1));
+    increaseButton->SetMinSize(wxSize(buttonWidth, -1));
+    factorSizer->Add(decreaseButton, 1, wxALL, 2);
+    factorSizer->Add(factorSlider, 6, wxALL, 2);
+    factorSizer->Add(increaseButton, 1, wxALL, 2);
+    factorSizer->Add(factorLabel, 2, wxALL, 5);
+    sizer->Add(factorSizer, 0, wxEXPAND, 0);
+    sizer->Add(applyButton, 0, wxALL, 5);
 
     submenuPanel->SetSizer(sizer);
     submenuPanel->Layout();
+
+    factorSlider->Bind(wxEVT_SCROLL_CHANGED, [factorLabel](wxScrollEvent& event) {
+        factorLabel->SetLabel(wxString::Format(wxT("%d"), event.GetPosition()));
+    });
+
+    decreaseButton->Bind(wxEVT_BUTTON, [factorSlider, factorLabel](wxCommandEvent& event) {
+        int value = factorSlider->GetValue();
+        if (value > 0) {
+            factorSlider->SetValue(value - 1);
+        }
+        factorLabel->SetLabel(wxString::Format(wxT("%d"), factorSlider->GetValue()));
+    });
+
+    increaseButton->Bind(wxEVT_BUTTON, [factorSlider, factorLabel](wxCommandEvent& event) {
+        int value = factorSlider->GetValue();
+        if (value < 255) {
+            factorSlider->SetValue(value + 1);
+        }
+        factorLabel->SetLabel(wxString::Format(wxT("%d"), factorSlider->GetValue()));
+    });
+
+    applyButton->Bind(wxEVT_BUTTON, [this, lightenCheckBox, darkenCheckBox, factorSlider](wxCommandEvent& event) {
+        OnApplyLightenDarken(lightenCheckBox->IsChecked(), darkenCheckBox->IsChecked(), factorSlider->GetValue());
+    });
 }
+
 
 void GimpFrame::CreateSubmenu2() {
     if (submenuPanel == nullptr) {
@@ -154,6 +202,45 @@ void GimpFrame::CreateSubmenu3() {
 
     submenuPanel->SetSizer(sizer);
     submenuPanel->Layout();
+}
+
+void GimpFrame::OnApplyLightenDarken(bool lighten, bool darken, int factor) {
+
+    if (mainImageMat.empty()) {
+        wxMessageBox("No image loaded.");
+        return;
+    }
+
+    if (!lighten && !darken) {
+        wxMessageBox("Please select either Lighten or Darken.");
+        return;
+    }
+
+    if (lighten && darken) {
+        wxMessageBox("Please select only one of Lighten or Darken.");
+        return;
+    }
+
+    int channels = mainImageMat.channels();
+    int rows = mainImageMat.rows;
+    int cols = mainImageMat.cols * channels;
+
+    if (lighten) {
+        for (int i = 0; i < rows; i++) {
+            uchar* data = mainImageMat.ptr<uchar>(i);
+            for (int j = 0; j < cols; j++) {
+                data[j] = std::min(255, data[j] + factor);
+            }
+        }
+    } else if (darken) {
+        for (int i = 0; i < rows; i++) {
+            uchar* data = mainImageMat.ptr<uchar>(i);
+            for (int j = 0; j < cols; j++) {
+                data[j] = std::max(0, data[j] + factor);
+            }
+        }
+    }
+    displayImageMatToSizer();
 }
 
 
