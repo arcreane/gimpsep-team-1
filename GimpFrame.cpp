@@ -56,27 +56,30 @@ void GimpFrame::OnLoadImage(wxCommandEvent& event) {
             wxMessageBox("Failed to load image", "Error", wxOK | wxICON_ERROR);
             return;
         }
-
-        wxImage image = MatToWxImage(mainImageMat);
-
-        int width = rightPanel->GetSize().GetWidth();
-        int height = rightPanel->GetSize().GetHeight();
-        double scaleFactor = std::min((double)width / image.GetWidth(), (double)height / image.GetHeight());
-        int newWidth = image.GetWidth() * scaleFactor;
-        int newHeight = image.GetHeight() * scaleFactor;
-        image.Rescale(newWidth, newHeight, wxIMAGE_QUALITY_HIGH);
-
-        if (bitmap) {
-            rightPanSizer->Detach(bitmap);
-            delete bitmap;
-            bitmap = nullptr;
-        }
-
-        bitmap = new wxStaticBitmap(rightPanel, wxID_ANY, wxBitmap(image));
-        rightPanSizer->Add(bitmap, 1, wxALL | wxEXPAND, 5);
-
-        rightPanel->Layout();
+        displayImageMatToSizer();
     }
+}
+
+void GimpFrame::displayImageMatToSizer(){
+    wxImage image = MatToWxImage(mainImageMat);
+
+    int width = rightPanel->GetSize().GetWidth();
+    int height = rightPanel->GetSize().GetHeight();
+    double scaleFactor = std::min((double)width / image.GetWidth(), (double)height / image.GetHeight());
+    int newWidth = image.GetWidth() * scaleFactor;
+    int newHeight = image.GetHeight() * scaleFactor;
+    image.Rescale(newWidth, newHeight, wxIMAGE_QUALITY_HIGH);
+
+    if (bitmap) {
+        rightPanSizer->Detach(bitmap);
+        delete bitmap;
+        bitmap = nullptr;
+    }
+
+    bitmap = new wxStaticBitmap(rightPanel, wxID_ANY, wxBitmap(image));
+    rightPanSizer->Add(bitmap, 1, wxALL | wxEXPAND, 5);
+
+    rightPanel->Layout();
 }
 
 wxGridSizer* GimpFrame::CreateButtonGrid() {

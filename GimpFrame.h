@@ -21,6 +21,7 @@ private:
     cv::Mat mainImageMat;
 
     void OnLoadImage(wxCommandEvent& event);
+    void displayImageMatToSizer();
 
     wxGridSizer* CreateButtonGrid();
 
