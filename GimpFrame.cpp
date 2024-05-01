@@ -43,10 +43,14 @@ GimpFrame::GimpFrame(const wxString &title) : wxFrame(nullptr,
 
     wxMenuBar* menuBar = new wxMenuBar();
     wxMenu* fileMenu = new wxMenu();
-    fileMenu->Append(wxID_ANY, "Load Image", "Load an image from file");
+    wxWindowID loadImageID = wxNewId();
+    fileMenu->Append(loadImageID, "Load Image", "Load an image from file");
+    wxWindowID saveImageID = wxNewId();
+    fileMenu->Append(saveImageID, "Save Image", "Save the modified image to a file");
     menuBar->Append(fileMenu, "File");
 
-    Bind(wxEVT_MENU, &GimpFrame::OnLoadImage, this, wxID_ANY);
+    Bind(wxEVT_MENU, &GimpFrame::OnLoadImage, this, loadImageID);
+    Bind(wxEVT_MENU, &GimpFrame::OnSaveImage, this, saveImageID);
 
     SetMenuBar(menuBar);
 
@@ -63,6 +67,37 @@ void GimpFrame::OnLoadImage(wxCommandEvent& event) {
         displayImageMatToSizer();
     }
 }
+
+void GimpFrame::OnSaveImage(wxCommandEvent& event) {
+    wxFileDialog dialog(this, "Save image as", "", "", "Image files (*.jpg, *.jpeg, *.png)|*.jpg;*.jpeg;*.png", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+    if (dialog.ShowModal() == wxID_OK) {
+        std::string filePath = dialog.GetPath().ToStdString();
+        int filterIndex = dialog.GetFilterIndex();
+        std::string fileExt;
+
+        switch (filterIndex) {
+            case 0:
+                fileExt = "jpg";
+                break;
+            case 1:
+                fileExt = "png";
+                break;
+            default:
+                fileExt = "jpg";
+                break;
+        }
+
+        size_t lastDotPos = filePath.find_last_of('.');
+        if (lastDotPos != std::string::npos && lastDotPos < filePath.size() - 1) {
+            filePath.replace(lastDotPos + 1, filePath.size() - lastDotPos - 1, fileExt);
+        } else {
+            filePath += "." + fileExt;
+        }
+
+        cv::imwrite(filePath, mainImageMat, {cv::IMWRITE_JPEG_QUALITY, 95});
+    }
+}
+
 
 void GimpFrame::displayImageMatToSizer(){
     wxImage image = MatToWxImage(mainImageMat);
@@ -90,7 +125,7 @@ wxGridSizer* GimpFrame::CreateButtonGrid() {
 
     wxGridSizer* buttonGrid = new wxGridSizer(3, 3, 1, 1);
 
-    wxButton* button1 = new wxButton(leftPanel, wxID_ANY, wxT("1"));
+    wxButton* button1 = new wxButton(leftPanel, wxID_ANY, wxT("Lighten/Darken"));
     int button1ID = 1;
     buttonGrid->Add(button1, 0, wxALL, 5);
     button1->Bind(wxEVT_BUTTON, [this, button1ID](wxCommandEvent& event) { OnButtonClicked(event, button1ID); });
@@ -236,7 +271,7 @@ void GimpFrame::OnApplyLightenDarken(bool lighten, bool darken, int factor) {
         for (int i = 0; i < rows; i++) {
             uchar* data = mainImageMat.ptr<uchar>(i);
             for (int j = 0; j < cols; j++) {
-                data[j] = std::max(0, data[j] + factor);
+                data[j] = std::max(0, data[j] - factor);
             }
         }
     }

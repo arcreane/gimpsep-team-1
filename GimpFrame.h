@@ -33,6 +33,8 @@ private:
 
 
     void OnApplyLightenDarken(bool lighten, bool darken, int factor);
+
+    void OnSaveImage(wxCommandEvent &event);
 };
 
 
