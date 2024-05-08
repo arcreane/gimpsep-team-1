@@ -9,7 +9,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, wxT("GimpIsep"), wxDefaultPo
                                  wxSize(1200, 700),wxDEFAULT_FRAME_STYLE & ~wxRESIZE_BORDER)  {
 
     contentPanel = new MenuPanel(this);
-    wxBoxSizer* vBoxSizer = new wxBoxSizer(wxVERTICAL);
+    vBoxSizer = new wxBoxSizer(wxVERTICAL);
     vBoxSizer->Add(contentPanel, 1, wxEXPAND | wxALL, 5);
 
     SetSizer(vBoxSizer);
@@ -23,7 +23,7 @@ void MainFrame::SetContentPanel(wxPanel* panel) {
         contentPanel->Destroy();
     }
     contentPanel = panel;
-    contentPanel->SetSizer(new wxBoxSizer(wxVERTICAL));
+    vBoxSizer->Add(contentPanel, 1, wxEXPAND | wxALL, 5);
     Layout();
 }
 

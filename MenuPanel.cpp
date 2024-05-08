@@ -30,10 +30,10 @@ MenuPanel::MenuPanel(wxWindow* parent) : wxPanel(parent, wxID_ANY) {
 
 void MenuPanel::OnGotoEditorButtonClicked(wxCommandEvent& event) {
     auto* editorPanel = new EditorPanel(GetParent());
-    static_cast<MainFrame*>(GetParent())->SetContentPanel(editorPanel);
+    dynamic_cast<MainFrame*>(GetParent())->SetContentPanel(editorPanel);
 }
 
 void MenuPanel::OnGotoStitcherButtonClicked(wxCommandEvent& event) {
     auto* stitcherPanel = new StitchPanel(GetParent());
-    static_cast<MainFrame*>(GetParent())->SetContentPanel(stitcherPanel);
+    dynamic_cast<MainFrame*>(GetParent())->SetContentPanel(stitcherPanel);
 }

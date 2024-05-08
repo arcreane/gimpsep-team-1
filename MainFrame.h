@@ -13,6 +13,7 @@ public:
     MainFrame();
     void SetContentPanel(wxPanel* panel);
 private:
+    wxBoxSizer* vBoxSizer;
     wxPanel* contentPanel;
 
 };
