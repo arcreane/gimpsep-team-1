@@ -18,12 +18,14 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 add_executable(gimpsep_team_1 main.cpp
         GimpIsep.cpp
         GimpIsep.h
-        MenuFrame.cpp
-        MenuFrame.h
-        EditorFrame.cpp
-        EditorFrame.h
-        StitcherFrame.cpp
-        StitchFrame.h)
+        MainFrame.cpp
+        MainFrame.h
+        EditorPanel.cpp
+        EditorPanel.h
+        StitchPanel.cpp
+        StitchPanel.h
+        MenuPanel.cpp
+        MenuPanel.h)
 
 target_link_libraries(gimpsep_team_1 PRIVATE wx::core wx::base ${OpenCV_LIBS})
 

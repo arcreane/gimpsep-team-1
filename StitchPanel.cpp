@@ -2,10 +2,9 @@
 // Created by ghisl on 08/05/2024.
 //
 
-#include "StitchFrame.h"
+#include "StitchPanel.h"
 
-StitchFrame::StitchFrame() : wxFrame(nullptr, wxID_ANY, wxT("GimpIsep"), wxDefaultPosition,
-                                     wxSize(1200, 700),wxDEFAULT_FRAME_STYLE & ~wxRESIZE_BORDER)  {
+StitchPanel::StitchPanel(wxWindow* parent) : wxPanel(parent, wxID_ANY) {
 
     wxStaticText* title = new wxStaticText(this, wxID_ANY, wxT("Stitcher Frame"));
 

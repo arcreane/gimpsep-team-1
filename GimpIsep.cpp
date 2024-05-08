@@ -3,10 +3,10 @@
 //
 
 #include "GimpIsep.h"
-#include "MenuFrame.h"
+#include "MainFrame.h"
 
 bool GimpIsep::OnInit() {
-    auto* frame = new MenuFrame();
+    auto* frame = new MainFrame();
     frame->Show(true);
     return true;
 }
