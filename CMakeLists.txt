@@ -23,7 +23,7 @@ add_executable(gimpsep_team_1 main.cpp
         EditorFrame.cpp
         EditorFrame.h
         StitcherFrame.cpp
-        StitcherFrame.h)
+        StitchFrame.h)
 
 target_link_libraries(gimpsep_team_1 PRIVATE wx::core wx::base ${OpenCV_LIBS})
 

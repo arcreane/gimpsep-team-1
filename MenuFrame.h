@@ -11,7 +11,11 @@ class MenuFrame : public wxFrame
 {
 public:
     MenuFrame();
-
+private:
+    wxButton* gotoEditorButton;
+    wxButton* gotoStitcherButton;
+    void OnGotoEditorButtonClicked(wxCommandEvent &event);
+    void OnGotoStitcherButtonClicked(wxCommandEvent &event);
 };
 
 
