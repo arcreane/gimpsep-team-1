@@ -2,9 +2,8 @@
 // Created by ghisl on 30/04/2024.
 //
 
-int main(){
+#include <wx/app.h>
+#include "GimpIsep.h"
 
+IMPLEMENT_APP(GimpIsep);
 
-
-    return EXIT_SUCCESS;
-}
