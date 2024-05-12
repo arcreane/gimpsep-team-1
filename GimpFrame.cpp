@@ -7,6 +7,7 @@
 #include "GimpFrame.h"
 #include "Manipulation.h"
 
+
 GimpFrame::GimpFrame(const wxString &title) : wxFrame(nullptr,
                                                       wxID_ANY, title,
                                                       wxDefaultPosition,
@@ -131,7 +132,7 @@ wxGridSizer* GimpFrame::CreateButtonGrid() {
     button1->Bind(wxEVT_BUTTON, [this, button1ID](wxCommandEvent& event) { OnButtonClicked(event, button1ID); });
 
 
-    wxButton* button2 = new wxButton(leftPanel, wxID_ANY, wxT("2"));
+    wxButton* button2 = new wxButton(leftPanel, wxID_ANY, wxT("Erode/Dilate"));
     int button2ID = 2;
     buttonGrid->Add(button2, 0, wxALL, 5);
     button2->Bind(wxEVT_BUTTON, [this, button2ID](wxCommandEvent& event) { OnButtonClicked(event, button2ID); });
@@ -141,7 +142,6 @@ wxGridSizer* GimpFrame::CreateButtonGrid() {
     int button3ID = 3;
     buttonGrid->Add(button3, 0, wxALL, 5);
     button3->Bind(wxEVT_BUTTON, [this, button3ID](wxCommandEvent& event) { OnButtonClicked(event, button3ID); });
-
 
     return buttonGrid;
 }
@@ -214,13 +214,25 @@ void GimpFrame::CreateSubmenu2() {
 
     submenuPanel->DestroyChildren();
 
-    wxStaticText* text = new wxStaticText(submenuPanel, wxID_ANY, wxT("This is submenu 2"));
+    wxStaticText* text = new wxStaticText(submenuPanel, wxID_ANY, wxT("Erode / Dilate Options"));
+    wxCheckBox* erodeCheckBox = new wxCheckBox(submenuPanel, wxID_ANY, wxT("Erode"));
+    wxCheckBox* dilateCheckBox = new wxCheckBox(submenuPanel, wxID_ANY, wxT("Dilate"));
+    wxSlider* kernelSizeSlider = new wxSlider(submenuPanel, wxID_ANY, 3, 1, 21, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
+    wxButton* applyButton = new wxButton(submenuPanel, wxID_ANY, wxT("Apply"));
 
     wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
     sizer->Add(text, 0, wxALL, 5);
+    sizer->Add(erodeCheckBox, 0, wxALL, 5);
+    sizer->Add(dilateCheckBox, 0, wxALL, 5);
+    sizer->Add(kernelSizeSlider, 0, wxEXPAND | wxALL, 5);
+    sizer->Add(applyButton, 0, wxALL, 5);
 
     submenuPanel->SetSizer(sizer);
     submenuPanel->Layout();
+
+    applyButton->Bind(wxEVT_BUTTON, [this, erodeCheckBox, dilateCheckBox, kernelSizeSlider](wxCommandEvent& event) {
+        OnApplyErodeDilate(erodeCheckBox->IsChecked(), dilateCheckBox->IsChecked(), kernelSizeSlider->GetValue());
+    });
 }
 
 void GimpFrame::CreateSubmenu3() {
@@ -275,6 +287,40 @@ void GimpFrame::OnApplyLightenDarken(bool lighten, bool darken, int factor) {
             }
         }
     }
+    displayImageMatToSizer();
+}
+
+void GimpFrame::OnApplyErodeDilate(bool erode, bool dilate, int kernelSize) {
+    if (mainImageMat.empty()) {
+        wxMessageBox("No image loaded.");
+        return;
+    }
+
+    if (!erode && !dilate) {
+        wxMessageBox("Please select either Erode or Dilate.");
+        return;
+    }
+
+    if (erode && dilate) {
+        wxMessageBox("Please select only one of Erode or Dilate.");
+        return;
+    }
+
+    // Ensure the kernel size is odd
+    if (kernelSize % 2 == 0) {
+        kernelSize += 1;
+    }
+
+    cv::Mat result;
+    cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(kernelSize, kernelSize));
+
+    if (erode) {
+        cv::erode(mainImageMat, result, element);
+    } else if (dilate) {
+        cv::dilate(mainImageMat, result, element);
+    }
+
+    mainImageMat = result;
     displayImageMatToSizer();
 }
 
