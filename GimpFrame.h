@@ -33,6 +33,7 @@ private:
 
 
     void OnApplyLightenDarken(bool lighten, bool darken, int factor);
+    void OnApplyErodeDilate(bool erode, bool dilate, int kernelSize);
 
     void OnSaveImage(wxCommandEvent &event);
 };
