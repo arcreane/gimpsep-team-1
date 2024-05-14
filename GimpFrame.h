@@ -34,6 +34,8 @@ private:
 
     void OnApplyLightenDarken(bool lighten, bool darken, int factor);
     void OnApplyErodeDilate(bool erode, bool dilate, int kernelSize);
+    void OnApplyResize(bool resizeByFactor, int factor, const wxString& widthStr, const wxString& heightStr);
+
 
     void OnSaveImage(wxCommandEvent &event);
 };
