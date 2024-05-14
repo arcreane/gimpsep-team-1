@@ -3,6 +3,8 @@
 //
 
 #include "MyMenuBar.h"
+#include "MainFrame.h"
+#include "MenuPanel.h"
 
 MyMenuBar::MyMenuBar(wxPanel* panel) {
 
@@ -15,5 +17,22 @@ MyMenuBar::MyMenuBar(wxPanel* panel) {
 
     this->Append(menuMenu, wxT("Menu"));
     this->Append(lsMenu, wxT("Image IO"));
+
+    this->Bind(wxEVT_COMMAND_MENU_SELECTED, &MyMenuBar::onMainMenuClk, this, 0);
+    this->Bind(wxEVT_COMMAND_MENU_SELECTED, &MyMenuBar::onLoadImageClk, this, 1);
+    this->Bind(wxEVT_COMMAND_MENU_SELECTED, &MyMenuBar::onSaveImageClk, this, 2);
+
+}
+
+void MyMenuBar::onMainMenuClk(wxCommandEvent &event) {
+
+    dynamic_cast<MainFrame*>(GetParent())->loadMenuPanel();
+}
+
+void MyMenuBar::onLoadImageClk(wxCommandEvent &event) {
+
+}
+
+void MyMenuBar::onSaveImageClk(wxCommandEvent &event) {
 
 }

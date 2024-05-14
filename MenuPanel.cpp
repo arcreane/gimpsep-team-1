@@ -3,9 +3,7 @@
 //
 
 #include "MenuPanel.h"
-#include "EditorPanel.h"
 #include "MainFrame.h"
-#include "StitchPanel.h"
 
 MenuPanel::MenuPanel(wxWindow* parent) : wxPanel(parent, wxID_ANY) {
     wxStaticText* title = new wxStaticText(this, wxID_ANY, wxT("Choose an option:"));
@@ -31,11 +29,9 @@ MenuPanel::MenuPanel(wxWindow* parent) : wxPanel(parent, wxID_ANY) {
 }
 
 void MenuPanel::OnGotoEditorButtonClicked(wxCommandEvent& event) {
-    auto* editorPanel = new EditorPanel(GetParent());
-    dynamic_cast<MainFrame*>(GetParent())->SetContentPanel(editorPanel);
+    dynamic_cast<MainFrame*>(GetParent())->loadEditorPanel();
 }
 
 void MenuPanel::OnGotoStitcherButtonClicked(wxCommandEvent& event) {
-    auto* stitcherPanel = new StitchPanel(GetParent());
-    dynamic_cast<MainFrame*>(GetParent())->SetContentPanel(stitcherPanel);
+    dynamic_cast<MainFrame*>(GetParent())->loadStitcherPanel();
 }

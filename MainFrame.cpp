@@ -9,23 +9,37 @@
 MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, wxT("GimpIsep"), wxDefaultPosition,
                                  wxSize(1200, 700),wxDEFAULT_FRAME_STYLE & ~wxRESIZE_BORDER)  {
 
-    contentPanel = new MenuPanel(this);
+    menuBar = new MyMenuBar(contentPanel);
+
     vBoxSizer = new wxBoxSizer(wxVERTICAL);
+
+    menuPanel = new MenuPanel(this);
+    editorPanel = new EditorPanel(this);
+    stitchPanel = new StitchPanel(this);
+
+    contentPanel = menuPanel;
     vBoxSizer->Add(contentPanel, 1, wxEXPAND | wxALL, 5);
+
     SetSizer(vBoxSizer);
 
-    menuBar = new MyMenuBar(contentPanel);
+    loadEditorPanel();
+    loadStitcherPanel();
+    loadMenuPanel();
 
     SetBackgroundColour(*wxWHITE);
 
 }
 
-void MainFrame::SetContentPanel(wxPanel* panel) {
-    if (contentPanel) {
-        contentPanel->Destroy();
+void MainFrame::SetContentPanel(wxPanel* newPanel) {
+    if (contentPanel != nullptr) {
+        vBoxSizer->Detach(contentPanel);
+        contentPanel->Hide();
     }
-    contentPanel = panel;
-    vBoxSizer->Add(contentPanel, 1, wxEXPAND | wxALL, 5);
+    if (newPanel != contentPanel) {
+        contentPanel = newPanel;
+        vBoxSizer->Add(contentPanel, 1, wxEXPAND | wxALL, 5);
+    }
+    contentPanel->Show();
     Layout();
 }
 
@@ -35,6 +49,18 @@ void MainFrame::loadImageIOMenu() {
 
 void MainFrame::hideImageIOMenu() {
     SetMenuBar(nullptr);
+}
+
+void MainFrame::loadMenuPanel() {
+    SetContentPanel(menuPanel);
+}
+
+void MainFrame::loadEditorPanel() {
+    SetContentPanel(editorPanel);
+}
+
+void MainFrame::loadStitcherPanel() {
+    SetContentPanel(stitchPanel);
 }
 
 

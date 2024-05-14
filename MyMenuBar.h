@@ -10,8 +10,12 @@
 
 class MyMenuBar : public wxMenuBar {
     wxPanel* contentPanel;
+
 public:
     explicit MyMenuBar(wxPanel *pPanel);
+    void onMainMenuClk(wxCommandEvent& event);
+    void onLoadImageClk(wxCommandEvent& event);
+    void onSaveImageClk(wxCommandEvent& event);
 
 };
 
