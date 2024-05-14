@@ -23,9 +23,10 @@ GimpFrame::GimpFrame(const wxString &title) : wxFrame(nullptr,
 
     submenuPanel = new wxPanel(leftPanel, wxID_ANY);
     submenuPanel->SetBackgroundColour(*wxWHITE);
+    submenuPanel->SetMinSize(wxSize(300, 400));
 
     wxBoxSizer* leftPanelSizer = new wxBoxSizer(wxVERTICAL);
-    leftPanelSizer->Add(buttonGrid, 1, wxEXPAND | wxALL, 5);
+    leftPanelSizer->Add(buttonGrid, 0, wxEXPAND | wxALL, 5);
     leftPanelSizer->Add(submenuPanel, 1, wxEXPAND | wxALL, 5);
 
     leftPanel->SetSizer(leftPanelSizer);
@@ -138,7 +139,7 @@ wxGridSizer* GimpFrame::CreateButtonGrid() {
     button2->Bind(wxEVT_BUTTON, [this, button2ID](wxCommandEvent& event) { OnButtonClicked(event, button2ID); });
 
 
-    wxButton* button3 = new wxButton(leftPanel, wxID_ANY, wxT("3"));
+    wxButton* button3 = new wxButton(leftPanel, wxID_ANY, wxT("Resize"));
     int button3ID = 3;
     buttonGrid->Add(button3, 0, wxALL, 5);
     button3->Bind(wxEVT_BUTTON, [this, button3ID](wxCommandEvent& event) { OnButtonClicked(event, button3ID); });
@@ -242,13 +243,41 @@ void GimpFrame::CreateSubmenu3() {
 
     submenuPanel->DestroyChildren();
 
-    wxStaticText* text = new wxStaticText(submenuPanel, wxID_ANY, wxT("This is submenu 3"));
+    wxStaticText* text = new wxStaticText(submenuPanel, wxID_ANY, wxT("Resize Options"));
+    wxRadioButton* factorRadioButton = new wxRadioButton(submenuPanel, wxID_ANY, wxT("Resize by Factor"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
+    wxRadioButton* dimensionsRadioButton = new wxRadioButton(submenuPanel, wxID_ANY, wxT("Resize by Dimensions"));
+
+    wxSlider* factorSlider = new wxSlider(submenuPanel, wxID_ANY, 1, 1, 10);
+    wxStaticText* factorLabel = new wxStaticText(submenuPanel, wxID_ANY, wxT("1"));
+
+    wxTextCtrl* widthCtrl = new wxTextCtrl(submenuPanel, wxID_ANY);
+    wxTextCtrl* heightCtrl = new wxTextCtrl(submenuPanel, wxID_ANY);
+
+    wxButton* applyButton = new wxButton(submenuPanel, wxID_ANY, wxT("Apply"));
 
     wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
     sizer->Add(text, 0, wxALL, 5);
+    sizer->Add(factorRadioButton, 0, wxALL, 5);
+    sizer->Add(factorSlider, 0, wxEXPAND | wxALL, 5);
+    sizer->Add(factorLabel, 0, wxALL, 5);
+    sizer->Add(dimensionsRadioButton, 0, wxALL, 5);
+    sizer->Add(new wxStaticText(submenuPanel, wxID_ANY, wxT("Width")), 0, wxALL, 5);
+    sizer->Add(widthCtrl, 0, wxEXPAND | wxALL, 5);
+    sizer->Add(new wxStaticText(submenuPanel, wxID_ANY, wxT("Height")), 0, wxALL, 5);
+    sizer->Add(heightCtrl, 0, wxEXPAND | wxALL, 5);
+    sizer->Add(applyButton, 0, wxALL, 5);
 
     submenuPanel->SetSizer(sizer);
     submenuPanel->Layout();
+    leftPanel->Layout();
+
+    factorSlider->Bind(wxEVT_SCROLL_CHANGED, [factorLabel](wxScrollEvent& event) {
+        factorLabel->SetLabel(wxString::Format(wxT("%d"), event.GetPosition()));
+    });
+
+    applyButton->Bind(wxEVT_BUTTON, [this, factorRadioButton, factorSlider, widthCtrl, heightCtrl](wxCommandEvent& event) {
+        OnApplyResize(factorRadioButton->GetValue(), factorSlider->GetValue(), widthCtrl->GetValue(), heightCtrl->GetValue());
+    });
 }
 
 void GimpFrame::OnApplyLightenDarken(bool lighten, bool darken, int factor) {
@@ -324,6 +353,28 @@ void GimpFrame::OnApplyErodeDilate(bool erode, bool dilate, int kernelSize) {
     displayImageMatToSizer();
 }
 
+void GimpFrame::OnApplyResize(bool resizeByFactor, int factor, const wxString& widthStr, const wxString& heightStr) {
+    if (mainImageMat.empty()) {
+        wxMessageBox("No image loaded.");
+        return;
+    }
+
+    cv::Mat resizedImage;
+    if (resizeByFactor) {
+        cv::resize(mainImageMat, resizedImage, cv::Size(), factor, factor);
+    } else {
+        int width = wxAtoi(widthStr);
+        int height = wxAtoi(heightStr);
+        if (width <= 0 || height <= 0) {
+            wxMessageBox("Invalid dimensions.");
+            return;
+        }
+        cv::resize(mainImageMat, resizedImage, cv::Size(width, height));
+    }
+
+    mainImageMat = resizedImage;
+    displayImageMatToSizer();
+}
 
 void GimpFrame::OnButtonClicked(wxCommandEvent& event, int buttonId) {
     switch (buttonId) {
