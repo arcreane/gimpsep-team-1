@@ -86,4 +86,8 @@ void MainFrame::setEditorPanelImage(cv::Mat inImage) {
 
 }
 
+cv::Mat MainFrame::getEditedImage() {
+    return editorPanel->getImage();
+}
+
 

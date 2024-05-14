@@ -21,6 +21,7 @@ public:
     void loadEditorPanel();
     void loadStitcherPanel();
     void setEditorPanelImage(cv::Mat);
+    cv::Mat getEditedImage();
 private:
     wxMenuBar* menuBar;
     MenuPanel* menuPanel;

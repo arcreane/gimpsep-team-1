@@ -69,7 +69,7 @@ void MyMenuBar::onSaveImageClk(wxCommandEvent &event) {
             wxMessageBox("You may not load an image here.", "Invalid location", wxOK | wxICON_INFORMATION);
             break;
         case 1:
-            //Retrieve main image from editor panel
+            image = dynamic_cast<MainFrame*>(GetParent())->getEditedImage();
             if (dialog.ShowModal() == wxID_OK) {
                 std::string filePath = dialog.GetPath().ToStdString();
                 int filterIndex = dialog.GetFilterIndex();
