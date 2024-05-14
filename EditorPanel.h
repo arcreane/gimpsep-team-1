@@ -28,11 +28,12 @@ public:
     void onButtonClicked(wxCommandEvent &event, int id);
 
     void createLightenSubmenu();
-    void createSubmenu2();
+    void createErodeDilateSubmenu();
     void createSubmenu3();
 
     void onApplyLighten();
     void onApplyOpenCVFunction();
+    void onApplyErodeDilate(bool erode, bool dilate, int kernelSize);
 };
 
 

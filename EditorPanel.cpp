@@ -73,7 +73,7 @@ wxGridSizer * EditorPanel::createButtonGrid() {
     buttonGrid->Add(button1, 0, wxALL, 5);
     button1->Bind(wxEVT_BUTTON, [this, button1ID](wxCommandEvent& event) { onButtonClicked(event, button1ID); });
 
-    wxButton* button2 = new wxButton(menuPanel, wxID_ANY, wxT("2"));
+    wxButton* button2 = new wxButton(menuPanel, wxID_ANY, wxT("Erode/Dilate"));
     int button2ID = 2;
     buttonGrid->Add(button2, 0, wxALL, 5);
     button2->Bind(wxEVT_BUTTON, [this, button2ID](wxCommandEvent& event) { onButtonClicked(event, button2ID); });
@@ -83,11 +83,6 @@ wxGridSizer * EditorPanel::createButtonGrid() {
     int button3ID = 3;
     buttonGrid->Add(button3, 0, wxALL, 5);
     button3->Bind(wxEVT_BUTTON, [this, button3ID](wxCommandEvent& event) { onButtonClicked(event, button3ID); });
-
-    wxButton* button4 = new wxButton(menuPanel, wxID_ANY, wxT("4"));
-    int button4ID = 4;
-    buttonGrid->Add(button4, 0, wxALL, 5);
-    button4->Bind(wxEVT_BUTTON, [this, button4ID](wxCommandEvent& event) { onButtonClicked(event, button4ID); });
 
     return buttonGrid;
 }
@@ -107,7 +102,7 @@ void EditorPanel::onButtonClicked(wxCommandEvent &event, int buttonId) {
             createLightenSubmenu();
             break;
         case 2:
-            createSubmenu2();
+            createErodeDilateSubmenu();
             break;
         case 3:
             createSubmenu3();
@@ -137,9 +132,36 @@ void EditorPanel::createLightenSubmenu() {
 
 }
 
-void EditorPanel::createSubmenu2() {
+void EditorPanel::createErodeDilateSubmenu() {
+    if (subMenuPanel == nullptr) {
+        return;
+    }
 
+    subMenuPanel->DestroyChildren();
+
+    wxStaticText* text = new wxStaticText(subMenuPanel, wxID_ANY, wxT("Erode / Dilate Options"));
+
+    wxRadioButton* erodeRadioButton = new wxRadioButton(subMenuPanel, wxID_ANY, wxT("Erode"));
+    wxRadioButton* dilateRadioButton = new wxRadioButton(subMenuPanel, wxID_ANY, wxT("Dilate"));
+
+    wxSlider* kernelSizeSlider = new wxSlider(subMenuPanel, wxID_ANY, 3, 1, 21, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
+    wxButton* applyButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Apply"));
+
+    wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+    sizer->Add(text, 0, wxALL, 5);
+    sizer->Add(erodeRadioButton, 0, wxALL, 5);
+    sizer->Add(dilateRadioButton, 0, wxALL, 5);
+    sizer->Add(kernelSizeSlider, 0, wxEXPAND | wxALL, 5);
+    sizer->Add(applyButton, 0, wxALL, 5);
+
+    subMenuPanel->SetSizer(sizer);
+    subMenuPanel->Layout();
+
+    applyButton->Bind(wxEVT_BUTTON, [this, erodeRadioButton, dilateRadioButton, kernelSizeSlider](wxCommandEvent& event) {
+        this->onApplyErodeDilate(erodeRadioButton->GetValue(), dilateRadioButton->GetValue(), kernelSizeSlider->GetValue());
+    });
 }
+
 
 void EditorPanel::createSubmenu3() {
 
@@ -164,6 +186,41 @@ void EditorPanel::onApplyLighten() {
     displayMainImageToPanel();
 
 }
+
+void EditorPanel::onApplyErodeDilate(bool erode, bool dilate, int kernelSize) {
+    if (mainImage.empty()) {
+        wxMessageBox("No image loaded.");
+        return;
+    }
+
+    if (!erode && !dilate) {
+        wxMessageBox("Please select either Erode or Dilate.");
+        return;
+    }
+
+    if (erode && dilate) {
+        wxMessageBox("Please select only one of Erode or Dilate.");
+        return;
+    }
+
+    // Ensure the kernel size is odd
+    if (kernelSize % 2 == 0) {
+        kernelSize += 1;
+    }
+
+    cv::Mat result;
+    cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(kernelSize, kernelSize));
+
+    if (erode) {
+        cv::erode(mainImage, result, element);
+    } else if (dilate) {
+        cv::dilate(mainImage, result, element);
+    }
+
+    mainImage = result;
+    displayMainImageToPanel();
+}
+
 
 void EditorPanel::onApplyOpenCVFunction() {
     //Soit faire cv::Mat newImage = cv::AppliquerFonction(parametres)
