@@ -26,6 +26,8 @@ MenuPanel::MenuPanel(wxWindow* parent) : wxPanel(parent, wxID_ANY) {
     vBoxSizer->AddStretchSpacer();
 
     SetSizer(vBoxSizer);
+
+    dynamic_cast<MainFrame*>(GetParent())->hideImageIOMenu();
 }
 
 void MenuPanel::OnGotoEditorButtonClicked(wxCommandEvent& event) {

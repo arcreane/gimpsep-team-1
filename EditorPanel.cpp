@@ -3,6 +3,7 @@
 //
 
 #include "EditorPanel.h"
+#include "MainFrame.h"
 
 EditorPanel::EditorPanel(wxWindow* parent) : wxPanel(parent, wxID_ANY) {
 
@@ -16,5 +17,7 @@ EditorPanel::EditorPanel(wxWindow* parent) : wxPanel(parent, wxID_ANY) {
     SetSizer(vBoxSizer);
 
     SetBackgroundColour(*wxWHITE);
+
+    dynamic_cast<MainFrame*>(GetParent())->loadImageIOMenu();
 
 }

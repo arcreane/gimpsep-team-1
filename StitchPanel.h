@@ -7,11 +7,12 @@
 
 
 #include <wx/wx.h>
+#include <opencv2/opencv.hpp>
 
 class StitchPanel : public wxPanel {
+    std::vector<cv::Mat> images;
 public:
     explicit StitchPanel(wxWindow* parent);
-
 };
 
 

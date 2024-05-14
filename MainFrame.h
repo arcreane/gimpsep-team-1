@@ -12,6 +12,8 @@ class MainFrame : public wxFrame
 public:
     MainFrame();
     void SetContentPanel(wxPanel* panel);
+    void loadImageIOMenu();
+    void hideImageIOMenu();
 private:
     wxMenuBar* menuBar;
     wxPanel* contentPanel;

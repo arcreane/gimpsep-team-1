@@ -3,6 +3,7 @@
 //
 
 #include "StitchPanel.h"
+#include "MainFrame.h"
 
 StitchPanel::StitchPanel(wxWindow* parent) : wxPanel(parent, wxID_ANY) {
 
@@ -16,5 +17,7 @@ StitchPanel::StitchPanel(wxWindow* parent) : wxPanel(parent, wxID_ANY) {
     SetSizer(vBoxSizer);
 
     SetBackgroundColour(*wxWHITE);
+
+    dynamic_cast<MainFrame*>(GetParent())->loadImageIOMenu();
 
 }

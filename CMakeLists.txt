@@ -25,7 +25,10 @@ add_executable(gimpsep_team_1 main.cpp
         StitchPanel.cpp
         StitchPanel.h
         MenuPanel.cpp
-        MenuPanel.h)
+        MenuPanel.h
+        MyMenuBar.cpp
+        MyMenuBar.h
+)
 
 target_link_libraries(gimpsep_team_1 PRIVATE wx::core wx::base ${OpenCV_LIBS})
 
