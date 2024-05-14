@@ -84,6 +84,10 @@ wxGridSizer * EditorPanel::createButtonGrid() {
     buttonGrid->Add(button3, 0, wxALL, 5);
     button3->Bind(wxEVT_BUTTON, [this, button3ID](wxCommandEvent& event) { onButtonClicked(event, button3ID); });
 
+    wxButton* button4 = new wxButton(menuPanel, wxID_ANY, wxT("4"));
+    int button4ID = 4;
+    buttonGrid->Add(button4, 0, wxALL, 5);
+    button4->Bind(wxEVT_BUTTON, [this, button4ID](wxCommandEvent& event) { onButtonClicked(event, button4ID); });
 
     return buttonGrid;
 }
