@@ -29,11 +29,12 @@ public:
 
     void createLightenSubmenu();
     void createErodeDilateSubmenu();
-    void createSubmenu3();
+    void createResizeSubmenu();
 
     void onApplyLighten();
     void onApplyOpenCVFunction();
     void onApplyErodeDilate(bool erode, bool dilate, int kernelSize);
+    void onApplyResize(bool resizeByFactor, int factor, const wxString& widthStr, const wxString& heightStr);
 };
 
 

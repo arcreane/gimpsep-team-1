@@ -79,7 +79,7 @@ wxGridSizer * EditorPanel::createButtonGrid() {
     button2->Bind(wxEVT_BUTTON, [this, button2ID](wxCommandEvent& event) { onButtonClicked(event, button2ID); });
 
 
-    wxButton* button3 = new wxButton(menuPanel, wxID_ANY, wxT("3"));
+    wxButton* button3 = new wxButton(menuPanel, wxID_ANY, wxT("Resize"));
     int button3ID = 3;
     buttonGrid->Add(button3, 0, wxALL, 5);
     button3->Bind(wxEVT_BUTTON, [this, button3ID](wxCommandEvent& event) { onButtonClicked(event, button3ID); });
@@ -105,7 +105,7 @@ void EditorPanel::onButtonClicked(wxCommandEvent &event, int buttonId) {
             createErodeDilateSubmenu();
             break;
         case 3:
-            createSubmenu3();
+            createResizeSubmenu();
             break;
             //Mettre les 9 autres cas
         default:
@@ -163,7 +163,48 @@ void EditorPanel::createErodeDilateSubmenu() {
 }
 
 
-void EditorPanel::createSubmenu3() {
+void EditorPanel::createResizeSubmenu() {
+    if (subMenuPanel == nullptr) {
+        return;
+    }
+
+    subMenuPanel->DestroyChildren();
+
+    wxStaticText* text = new wxStaticText(subMenuPanel, wxID_ANY, wxT("Resize Options"));
+    wxRadioButton* factorRadioButton = new wxRadioButton(subMenuPanel, wxID_ANY, wxT("Resize by Factor"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
+    wxRadioButton* dimensionsRadioButton = new wxRadioButton(subMenuPanel, wxID_ANY, wxT("Resize by Dimensions"));
+
+    wxSlider* factorSlider = new wxSlider(subMenuPanel, wxID_ANY, 1, 1, 10);
+    wxStaticText* factorLabel = new wxStaticText(subMenuPanel, wxID_ANY, wxT("1"));
+
+    wxTextCtrl* widthCtrl = new wxTextCtrl(subMenuPanel, wxID_ANY);
+    wxTextCtrl* heightCtrl = new wxTextCtrl(subMenuPanel, wxID_ANY);
+
+    wxButton* applyButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Apply"));
+
+    wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+    sizer->Add(text, 0, wxALL, 5);
+    sizer->Add(factorRadioButton, 0, wxALL, 5);
+    sizer->Add(factorSlider, 0, wxEXPAND | wxALL, 5);
+    sizer->Add(factorLabel, 0, wxALL, 5);
+    sizer->Add(dimensionsRadioButton, 0, wxALL, 5);
+    sizer->Add(new wxStaticText(subMenuPanel, wxID_ANY, wxT("Width")), 0, wxALL, 5);
+    sizer->Add(widthCtrl, 0, wxEXPAND | wxALL, 5);
+    sizer->Add(new wxStaticText(subMenuPanel, wxID_ANY, wxT("Height")), 0, wxALL, 5);
+    sizer->Add(heightCtrl, 0, wxEXPAND | wxALL, 5);
+    sizer->Add(applyButton, 0, wxALL, 5);
+
+    subMenuPanel->SetSizer(sizer);
+    subMenuPanel->Layout();
+    menuPanel->Layout();
+
+    factorSlider->Bind(wxEVT_SCROLL_CHANGED, [factorLabel](wxScrollEvent& event) {
+        factorLabel->SetLabel(wxString::Format(wxT("%d"), event.GetPosition()));
+    });
+
+    applyButton->Bind(wxEVT_BUTTON, [this, factorRadioButton, factorSlider, widthCtrl, heightCtrl](wxCommandEvent& event) {
+        onApplyResize(factorRadioButton->GetValue(), factorSlider->GetValue(), widthCtrl->GetValue(), heightCtrl->GetValue());
+    });
 
 }
 
@@ -221,6 +262,28 @@ void EditorPanel::onApplyErodeDilate(bool erode, bool dilate, int kernelSize) {
     displayMainImageToPanel();
 }
 
+void EditorPanel::onApplyResize(bool resizeByFactor, int factor, const wxString& widthStr, const wxString& heightStr) {
+    if (mainImage.empty()) {
+        wxMessageBox("No image loaded.");
+        return;
+    }
+
+    cv::Mat resizedImage;
+    if (resizeByFactor) {
+        cv::resize(mainImage, resizedImage, cv::Size(), factor, factor);
+    } else {
+        int width = wxAtoi(widthStr);
+        int height = wxAtoi(heightStr);
+        if (width <= 0 || height <= 0) {
+            wxMessageBox("Invalid dimensions.");
+            return;
+        }
+        cv::resize(mainImage, resizedImage, cv::Size(width, height));
+    }
+
+    mainImage = resizedImage;
+    displayMainImageToPanel();
+}
 
 void EditorPanel::onApplyOpenCVFunction() {
     //Soit faire cv::Mat newImage = cv::AppliquerFonction(parametres)
