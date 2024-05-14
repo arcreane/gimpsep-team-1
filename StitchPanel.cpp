@@ -18,6 +18,6 @@ StitchPanel::StitchPanel(wxWindow* parent) : wxPanel(parent, wxID_ANY) {
 
     SetBackgroundColour(*wxWHITE);
 
-    dynamic_cast<MainFrame*>(GetParent())->loadImageIOMenu();
+
 
 }

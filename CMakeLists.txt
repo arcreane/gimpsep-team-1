@@ -28,6 +28,8 @@ add_executable(gimpsep_team_1 main.cpp
         MenuPanel.h
         MyMenuBar.cpp
         MyMenuBar.h
+        Manipulation.cpp
+        Manipulation.h
 )
 
 target_link_libraries(gimpsep_team_1 PRIVATE wx::core wx::base ${OpenCV_LIBS})

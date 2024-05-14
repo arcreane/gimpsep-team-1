@@ -4,7 +4,6 @@
 
 #include "MyMenuBar.h"
 #include "MainFrame.h"
-#include "MenuPanel.h"
 
 MyMenuBar::MyMenuBar(wxPanel* panel) {
 
@@ -25,14 +24,80 @@ MyMenuBar::MyMenuBar(wxPanel* panel) {
 }
 
 void MyMenuBar::onMainMenuClk(wxCommandEvent &event) {
-
     dynamic_cast<MainFrame*>(GetParent())->loadMenuPanel();
 }
 
 void MyMenuBar::onLoadImageClk(wxCommandEvent &event) {
 
+    cv::Mat image;
+    wxFileDialog dialog(this, "Select an image file", "", "", "Image files (*.jpg, *.jpeg, *.png)|*.jpg;*.jpeg;*.png", wxFD_OPEN);
+
+    switch (dynamic_cast<MainFrame*>(GetParent())->getCurrentPanel()) {
+        case 0:
+            wxMessageBox("You may not load an image here.", "Invalid location", wxOK | wxICON_INFORMATION);
+            break;
+        case 1:
+            if (dialog.ShowModal() == wxID_OK) {
+                image = cv::imread(dialog.GetPath().ToStdString(), cv::IMREAD_COLOR);
+                if (image.empty()) {
+                    wxMessageBox("Failed to load image", "Error", wxOK | wxICON_ERROR);
+                    return;
+                }
+                dynamic_cast<MainFrame*>(GetParent())->setEditorPanelImage(image);
+            }
+            break;
+        case 2:
+            //Add image to stitcher list
+            if (dialog.ShowModal() == wxID_OK) {
+                image = cv::imread(dialog.GetPath().ToStdString(), cv::IMREAD_COLOR);
+                if (image.empty()) {
+                    wxMessageBox("Failed to load image", "Error", wxOK | wxICON_ERROR);
+                    return;
+                }
+            }
+            break;
+    }
 }
 
 void MyMenuBar::onSaveImageClk(wxCommandEvent &event) {
+
+    wxFileDialog dialog(this, "Save image as", "", "", "Image files (*.jpg, *.jpeg, *.png)|*.jpg;*.jpeg;*.png", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+    cv::Mat image;
+
+    switch (dynamic_cast<MainFrame*>(GetParent())->getCurrentPanel()) {
+        case 0:
+            wxMessageBox("You may not load an image here.", "Invalid location", wxOK | wxICON_INFORMATION);
+            break;
+        case 1:
+            //Retrieve main image from editor panel
+            if (dialog.ShowModal() == wxID_OK) {
+                std::string filePath = dialog.GetPath().ToStdString();
+                int filterIndex = dialog.GetFilterIndex();
+                std::string fileExt;
+                switch (filterIndex) {
+                    case 0:
+                        fileExt = "jpg";
+                        break;
+                    case 1:
+                        fileExt = "png";
+                        break;
+                    default:
+                        fileExt = "jpg";
+                        break;
+                }
+                size_t lastDotPos = filePath.find_last_of('.');
+                if (lastDotPos != std::string::npos && lastDotPos < filePath.size() - 1) {
+                    filePath.replace(lastDotPos + 1, filePath.size() - lastDotPos - 1, fileExt);
+                } else {
+                    filePath += "." + fileExt;
+                }
+                cv::imwrite(filePath, image, {cv::IMWRITE_JPEG_QUALITY, 95});
+            }
+        case 2:
+            //Save stitched image
+
+            break;
+    }
+
 
 }

@@ -14,11 +14,13 @@ class MainFrame : public wxFrame
 {
 public:
     MainFrame();
+    int getCurrentPanel();
     void loadImageIOMenu();
     void hideImageIOMenu();
     void loadMenuPanel();
     void loadEditorPanel();
     void loadStitcherPanel();
+    void setEditorPanelImage(cv::Mat);
 private:
     wxMenuBar* menuBar;
     MenuPanel* menuPanel;

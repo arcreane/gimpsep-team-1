@@ -3,6 +3,8 @@
 //
 
 #include "MainFrame.h"
+
+#include <utility>
 #include "MenuPanel.h"
 #include "MyMenuBar.h"
 
@@ -21,13 +23,25 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, wxT("GimpIsep"), wxDefaultPo
     vBoxSizer->Add(contentPanel, 1, wxEXPAND | wxALL, 5);
 
     SetSizer(vBoxSizer);
-
     loadEditorPanel();
     loadStitcherPanel();
     loadMenuPanel();
 
     SetBackgroundColour(*wxWHITE);
 
+}
+
+int MainFrame::getCurrentPanel() {
+    if (contentPanel == menuPanel) {
+        return 0;
+    } else if (contentPanel == editorPanel) {
+        return 1;
+    } else if (contentPanel == stitchPanel) {
+        return 2;
+    } else {
+        wxASSERT(false);
+        return -1;
+    }
 }
 
 void MainFrame::SetContentPanel(wxPanel* newPanel) {
@@ -53,14 +67,23 @@ void MainFrame::hideImageIOMenu() {
 
 void MainFrame::loadMenuPanel() {
     SetContentPanel(menuPanel);
+    hideImageIOMenu();
 }
 
 void MainFrame::loadEditorPanel() {
     SetContentPanel(editorPanel);
+    loadImageIOMenu();
 }
 
 void MainFrame::loadStitcherPanel() {
     SetContentPanel(stitchPanel);
+    loadMenuPanel();
+}
+
+void MainFrame::setEditorPanelImage(cv::Mat inImage) {
+    editorPanel->setImage(std::move(inImage));
+    editorPanel->displayMainImageToPanel();
+
 }
 
 

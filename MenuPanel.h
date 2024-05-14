@@ -10,13 +10,11 @@
 class MenuPanel : public wxPanel {
 public:
     explicit MenuPanel(wxWindow* parent);
-    void OnGotoEditorButtonClicked(wxCommandEvent &event);
-    void OnGotoStitcherButtonClicked(wxCommandEvent &event);
 private:
     wxButton* gotoEditorButton;
     wxButton* gotoStitcherButton;
-
-
+    void OnGotoEditorButtonClicked(wxCommandEvent &event);
+    void OnGotoStitcherButtonClicked(wxCommandEvent &event);
 };
 
 
