@@ -96,10 +96,18 @@ void StitchPanel::refreshDisplay() {
 }
 
 void StitchPanel::removeLastImage() {
+    if(!stitchedImage.empty()){
+        stitchedImage.release();
+        images.clear();
+        imagesPanel->DestroyChildren();
+        imagesSizer = new wxGridSizer(2, 3, 0, 0);
+        imagesPanel->SetSizer(imagesSizer);
+        imagesSizer->Layout();
+    }
     if (!images.empty()) {
         images.pop_back();
-        displayImageList();
     }
+    displayImageList();
 }
 
 cv::Mat StitchPanel::getStitchedImage() {
