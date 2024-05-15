@@ -11,8 +11,23 @@
 
 class StitchPanel : public wxPanel {
     std::vector<cv::Mat> images;
+    cv::Mat stitchedImage;
+    wxButton* stitchButton;
+    wxButton* removeButton;
+    wxBoxSizer* buttonSizer;
+    wxBoxSizer* vBoxSizer;
+    wxPanel* imagesPanel;
+    wxGridSizer* imagesSizer;
+    void stitchImages();
 public:
     explicit StitchPanel(wxWindow* parent);
+    void addImageToList(const cv::Mat&);
+    void displayImageList();
+    void refreshDisplay();
+
+    void removeLastImage();
+
+    cv::Mat getStitchedImage();
 };
 
 
