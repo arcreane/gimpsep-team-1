@@ -77,7 +77,7 @@ void MainFrame::loadEditorPanel() {
 
 void MainFrame::loadStitcherPanel() {
     SetContentPanel(stitchPanel);
-    loadMenuPanel();
+    loadImageIOMenu();
 }
 
 void MainFrame::setEditorPanelImage(cv::Mat inImage) {
@@ -88,6 +88,15 @@ void MainFrame::setEditorPanelImage(cv::Mat inImage) {
 
 cv::Mat MainFrame::getEditedImage() {
     return editorPanel->getImage();
+}
+
+void MainFrame::addImageToStitcherList(cv::Mat inImage){
+    stitchPanel->addImageToList(inImage);
+    stitchPanel->displayImageList();
+}
+
+cv::Mat MainFrame::getStitchedImage() {
+    return stitchPanel->getStitchedImage();
 }
 
 
