@@ -1,6 +1,6 @@
 //
 // Created by ghisl on 08/05/2024.
-//
+// New branch 8 by Clémentine
 
 #include "EditorPanel.h"
 #include "MainFrame.h"
