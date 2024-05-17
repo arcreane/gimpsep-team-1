@@ -84,6 +84,11 @@ wxGridSizer * EditorPanel::createButtonGrid() {
     buttonGrid->Add(button3, 0, wxALL, 5);
     button3->Bind(wxEVT_BUTTON, [this, button3ID](wxCommandEvent& event) { onButtonClicked(event, button3ID); });
 
+    wxButton* button4 = new wxButton(menuPanel, wxID_ANY, wxT("Canny"));
+    int button4ID = 4;
+    buttonGrid->Add(button4, 0, wxALL, 5);
+    button4->Bind(wxEVT_BUTTON, [this, button4ID](wxCommandEvent& event) { onButtonClicked(event, button4ID); });
+
     return buttonGrid;
 }
 
@@ -107,7 +112,9 @@ void EditorPanel::onButtonClicked(wxCommandEvent &event, int buttonId) {
         case 3:
             createResizeSubmenu();
             break;
-            //Mettre les 9 autres cas
+        case 4:
+            createCannySubmenu();
+        break;
         default:
             wxMessageBox("Invalid button ID");
             break;
@@ -208,6 +215,42 @@ void EditorPanel::createResizeSubmenu() {
 
 }
 
+void EditorPanel::createCannySubmenu() {
+    if (subMenuPanel == nullptr) {
+        return;
+    }
+
+    subMenuPanel->DestroyChildren();
+
+    wxStaticText* text = new wxStaticText(subMenuPanel, wxID_ANY, wxT("Canny Edge Detection"));
+
+    wxTextCtrl* lowThresholdCtrl = new wxTextCtrl(subMenuPanel, wxID_ANY);
+    wxTextCtrl* highThresholdCtrl = new wxTextCtrl(subMenuPanel, wxID_ANY);
+    wxSlider* kernelSizeSlider = new wxSlider(subMenuPanel, wxID_ANY, 3, 1, 7, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
+
+    wxButton* applyButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Apply"));
+
+    wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+    sizer->Add(text, 0, wxALL, 5);
+    sizer->Add(new wxStaticText(subMenuPanel, wxID_ANY, wxT("Low Threshold")), 0, wxALL, 5);
+    sizer->Add(lowThresholdCtrl, 0, wxEXPAND | wxALL, 5);
+    sizer->Add(new wxStaticText(subMenuPanel, wxID_ANY, wxT("High Threshold")), 0, wxALL, 5);
+    sizer->Add(highThresholdCtrl, 0, wxEXPAND | wxALL, 5);
+    sizer->Add(new wxStaticText(subMenuPanel, wxID_ANY, wxT("Kernel Size (Only odd values)")), 0, wxALL, 5);
+    sizer->Add(kernelSizeSlider, 0, wxEXPAND | wxALL, 5);
+    sizer->Add(applyButton, 0, wxALL, 5);
+
+    subMenuPanel->SetSizer(sizer);
+    subMenuPanel->Layout();
+    menuPanel->Layout();
+
+    applyButton->Bind(wxEVT_BUTTON, [this, lowThresholdCtrl, highThresholdCtrl, kernelSizeSlider](wxCommandEvent& event) {
+        onApplyCanny(wxAtol(lowThresholdCtrl->GetValue()), wxAtol(highThresholdCtrl->GetValue()), kernelSizeSlider->GetValue());
+    });
+}
+
+
+
 void EditorPanel::onApplyLighten() {
     if (mainImage.empty()) {
         wxMessageBox("No image loaded.");
@@ -285,9 +328,30 @@ void EditorPanel::onApplyResize(bool resizeByFactor, int factor, const wxString&
     displayMainImageToPanel();
 }
 
+void EditorPanel::onApplyCanny(long lowThreshold, long highThreshold, int kernelSize) {
+    if (mainImage.empty()) {
+        wxMessageBox("No image loaded.");
+        return;
+    }
+
+    // Ensure the kernel size is odd
+    if (kernelSize % 2 == 0) {
+        wxMessageBox("Kernel size must be odd.");
+        return;
+    }
+
+    cv::Mat edges;
+    cv::Canny(mainImage, edges, lowThreshold, highThreshold, kernelSize);
+
+    mainImage = edges;
+    displayMainImageToPanel();
+}
+
+
 void EditorPanel::onApplyOpenCVFunction() {
     //Soit faire cv::Mat newImage = cv::AppliquerFonction(parametres)
     //mainImage = newImage;
     //Soit mainImage = cv::AppliquerFonction(params)
     displayMainImageToPanel();
 }
+
