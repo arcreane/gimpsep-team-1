@@ -42,6 +42,7 @@ EditorPanel::EditorPanel(wxWindow* parent) : wxPanel(parent, wxID_ANY) {
 
 void EditorPanel::setImage(cv::Mat inImage) {
     mainImage = inImage;
+    originalImage = inImage.clone(); //Clone l'image
 }
 
 void EditorPanel::displayMainImageToPanel(){
@@ -68,7 +69,7 @@ void EditorPanel::displayMainImageToPanel(){
 wxGridSizer * EditorPanel::createButtonGrid() {
     wxGridSizer* buttonGrid = new wxGridSizer(3, 3, 1, 1);
 
-    wxButton* button1 = new wxButton(menuPanel, wxID_ANY, wxT("Lighten"));
+    wxButton* button1 = new wxButton(menuPanel, wxID_ANY, wxT("Lighten/Darken"));
     int button1ID = 1;
     buttonGrid->Add(button1, 0, wxALL, 5);
     button1->Bind(wxEVT_BUTTON, [this, button1ID](wxCommandEvent& event) { onButtonClicked(event, button1ID); });
@@ -104,7 +105,7 @@ void EditorPanel::onButtonClicked(wxCommandEvent &event, int buttonId) {
 
     switch (buttonId) {
         case 1:
-            createLightenSubmenu();
+            createLightenDarkenSubmenu();
             break;
         case 2:
             createErodeDilateSubmenu();
@@ -121,23 +122,33 @@ void EditorPanel::onButtonClicked(wxCommandEvent &event, int buttonId) {
     }
 }
 
-void EditorPanel::createLightenSubmenu() {
-    wxButton* applyButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Lighten"));
+void EditorPanel::createLightenDarkenSubmenu() {
+    if (subMenuPanel == nullptr) {
+        return;
+    }
+
+    subMenuPanel->DestroyChildren();
+
+    wxStaticText* text = new wxStaticText(subMenuPanel, wxID_ANY, wxT("Adjust Brightness (-100 to +100)"));
+    wxSlider* brightnessSlider = new wxSlider(subMenuPanel, wxID_ANY, 0, -100, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
+    wxStaticText* sliderValueDisplay = new wxStaticText(subMenuPanel, wxID_ANY, wxT("0"), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER_HORIZONTAL);
+
     wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
-    sizer->Add(applyButton, 0, wxALL, 5);
+    sizer->Add(text, 0, wxALL, 5);
+    sizer->Add(brightnessSlider, 0, wxEXPAND | wxALL, 5);
+    sizer->Add(sliderValueDisplay, 0, wxALL | wxEXPAND, 5);
 
-    applyButton->Bind(wxEVT_BUTTON, [this](wxCommandEvent& event) {
-        onApplyLighten();
+    subMenuPanel->SetSizer(sizer);
+    subMenuPanel->Layout();
+
+    // Update the display as the slider moves
+    brightnessSlider->Bind(wxEVT_SLIDER, [this, brightnessSlider, sliderValueDisplay](wxCommandEvent& event) {
+        int value = brightnessSlider->GetValue();
+        sliderValueDisplay->SetLabel(wxString::Format(wxT("%d"), value));
+        onApplyLightenDarken(value);
     });
-
-    /*
-    OU POUR PASSER DES COMPOSANTS DU SUBMENU
-     applyButton->Bind(wxEVT_BUTTON, [this, lightenCheckBox, darkenCheckBox, factorSlider](wxCommandEvent& event) {
-        OnApplyLightenDarken(lightenCheckBox->IsChecked(), darkenCheckBox->IsChecked(), factorSlider->GetValue());
-    });
-    */
-
 }
+
 
 void EditorPanel::createErodeDilateSubmenu() {
     if (subMenuPanel == nullptr) {
@@ -147,28 +158,28 @@ void EditorPanel::createErodeDilateSubmenu() {
     subMenuPanel->DestroyChildren();
 
     wxStaticText* text = new wxStaticText(subMenuPanel, wxID_ANY, wxT("Erode / Dilate Options"));
-
-    wxRadioButton* erodeRadioButton = new wxRadioButton(subMenuPanel, wxID_ANY, wxT("Erode"));
+    wxRadioButton* erodeRadioButton = new wxRadioButton(subMenuPanel, wxID_ANY, wxT("Erode"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
     wxRadioButton* dilateRadioButton = new wxRadioButton(subMenuPanel, wxID_ANY, wxT("Dilate"));
-
     wxSlider* kernelSizeSlider = new wxSlider(subMenuPanel, wxID_ANY, 3, 1, 21, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
-    wxButton* applyButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Apply"));
 
     wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
     sizer->Add(text, 0, wxALL, 5);
     sizer->Add(erodeRadioButton, 0, wxALL, 5);
     sizer->Add(dilateRadioButton, 0, wxALL, 5);
     sizer->Add(kernelSizeSlider, 0, wxEXPAND | wxALL, 5);
-    sizer->Add(applyButton, 0, wxALL, 5);
 
     subMenuPanel->SetSizer(sizer);
     subMenuPanel->Layout();
 
-    applyButton->Bind(wxEVT_BUTTON, [this, erodeRadioButton, dilateRadioButton, kernelSizeSlider](wxCommandEvent& event) {
+    // Bind slider and radio buttons for real-time update
+    auto updateFunction = [this, erodeRadioButton, dilateRadioButton, kernelSizeSlider](wxCommandEvent& event) {
         this->onApplyErodeDilate(erodeRadioButton->GetValue(), dilateRadioButton->GetValue(), kernelSizeSlider->GetValue());
-    });
-}
+    };
 
+    kernelSizeSlider->Bind(wxEVT_SCROLL_THUMBTRACK, updateFunction);
+    erodeRadioButton->Bind(wxEVT_RADIOBUTTON, updateFunction);
+    dilateRadioButton->Bind(wxEVT_RADIOBUTTON, updateFunction);
+}
 
 void EditorPanel::createResizeSubmenu() {
     if (subMenuPanel == nullptr) {
@@ -181,19 +192,15 @@ void EditorPanel::createResizeSubmenu() {
     wxRadioButton* factorRadioButton = new wxRadioButton(subMenuPanel, wxID_ANY, wxT("Resize by Factor"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
     wxRadioButton* dimensionsRadioButton = new wxRadioButton(subMenuPanel, wxID_ANY, wxT("Resize by Dimensions"));
 
-    wxSlider* factorSlider = new wxSlider(subMenuPanel, wxID_ANY, 1, 1, 10);
-    wxStaticText* factorLabel = new wxStaticText(subMenuPanel, wxID_ANY, wxT("1"));
-
+    wxSlider* factorSlider = new wxSlider(subMenuPanel, wxID_ANY, 1, 1, 10, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
     wxTextCtrl* widthCtrl = new wxTextCtrl(subMenuPanel, wxID_ANY);
     wxTextCtrl* heightCtrl = new wxTextCtrl(subMenuPanel, wxID_ANY);
-
     wxButton* applyButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Apply"));
 
     wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
     sizer->Add(text, 0, wxALL, 5);
     sizer->Add(factorRadioButton, 0, wxALL, 5);
     sizer->Add(factorSlider, 0, wxEXPAND | wxALL, 5);
-    sizer->Add(factorLabel, 0, wxALL, 5);
     sizer->Add(dimensionsRadioButton, 0, wxALL, 5);
     sizer->Add(new wxStaticText(subMenuPanel, wxID_ANY, wxT("Width")), 0, wxALL, 5);
     sizer->Add(widthCtrl, 0, wxEXPAND | wxALL, 5);
@@ -205,14 +212,27 @@ void EditorPanel::createResizeSubmenu() {
     subMenuPanel->Layout();
     menuPanel->Layout();
 
-    factorSlider->Bind(wxEVT_SCROLL_CHANGED, [factorLabel](wxScrollEvent& event) {
-        factorLabel->SetLabel(wxString::Format(wxT("%d"), event.GetPosition()));
+    factorSlider->Bind(wxEVT_SCROLL_THUMBTRACK, [this, factorRadioButton, widthCtrl, heightCtrl, factorSlider](wxScrollEvent& event) {
+        if (factorRadioButton->GetValue()) {
+            onApplyResize(true, factorSlider->GetValue(), "", "");
+        }
+    });
+
+    widthCtrl->Bind(wxEVT_TEXT, [this, factorRadioButton, widthCtrl, heightCtrl](wxCommandEvent& event) {
+        if (!factorRadioButton->GetValue()) {
+            onApplyResize(false, 1, widthCtrl->GetValue(), heightCtrl->GetValue());
+        }
+    });
+
+    heightCtrl->Bind(wxEVT_TEXT, [this, factorRadioButton, widthCtrl, heightCtrl](wxCommandEvent& event) {
+        if (!factorRadioButton->GetValue()) {
+            onApplyResize(false, 1, widthCtrl->GetValue(), heightCtrl->GetValue());
+        }
     });
 
     applyButton->Bind(wxEVT_BUTTON, [this, factorRadioButton, factorSlider, widthCtrl, heightCtrl](wxCommandEvent& event) {
         onApplyResize(factorRadioButton->GetValue(), factorSlider->GetValue(), widthCtrl->GetValue(), heightCtrl->GetValue());
     });
-
 }
 
 void EditorPanel::createCannySubmenu() {
@@ -223,12 +243,9 @@ void EditorPanel::createCannySubmenu() {
     subMenuPanel->DestroyChildren();
 
     wxStaticText* text = new wxStaticText(subMenuPanel, wxID_ANY, wxT("Canny Edge Detection"));
-
     wxTextCtrl* lowThresholdCtrl = new wxTextCtrl(subMenuPanel, wxID_ANY);
     wxTextCtrl* highThresholdCtrl = new wxTextCtrl(subMenuPanel, wxID_ANY);
     wxSlider* kernelSizeSlider = new wxSlider(subMenuPanel, wxID_ANY, 3, 1, 7, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
-
-    wxButton* applyButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Apply"));
 
     wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
     sizer->Add(text, 0, wxALL, 5);
@@ -238,38 +255,62 @@ void EditorPanel::createCannySubmenu() {
     sizer->Add(highThresholdCtrl, 0, wxEXPAND | wxALL, 5);
     sizer->Add(new wxStaticText(subMenuPanel, wxID_ANY, wxT("Kernel Size (Only odd values)")), 0, wxALL, 5);
     sizer->Add(kernelSizeSlider, 0, wxEXPAND | wxALL, 5);
-    sizer->Add(applyButton, 0, wxALL, 5);
 
     subMenuPanel->SetSizer(sizer);
     subMenuPanel->Layout();
     menuPanel->Layout();
 
-    applyButton->Bind(wxEVT_BUTTON, [this, lowThresholdCtrl, highThresholdCtrl, kernelSizeSlider](wxCommandEvent& event) {
+    // Bind events for real-time update
+    lowThresholdCtrl->Bind(wxEVT_TEXT, [this, lowThresholdCtrl, highThresholdCtrl, kernelSizeSlider](wxCommandEvent& event) {
+        onApplyCanny(wxAtol(lowThresholdCtrl->GetValue()), wxAtol(highThresholdCtrl->GetValue()), kernelSizeSlider->GetValue());
+    });
+
+    highThresholdCtrl->Bind(wxEVT_TEXT, [this, lowThresholdCtrl, highThresholdCtrl, kernelSizeSlider](wxCommandEvent& event) {
+        onApplyCanny(wxAtol(lowThresholdCtrl->GetValue()), wxAtol(highThresholdCtrl->GetValue()), kernelSizeSlider->GetValue());
+    });
+
+    lowThresholdCtrl->Bind(wxEVT_TEXT, [this, lowThresholdCtrl, highThresholdCtrl, kernelSizeSlider](wxCommandEvent& event) {
+        long lowThreshold = wxAtol(lowThresholdCtrl->GetValue());
+        long highThreshold = wxAtol(highThresholdCtrl->GetValue());
+        if (lowThreshold == 0 && highThreshold == 0) {
+            // Reload original image if both thresholds are set to zero
+            mainImage = originalImage.clone(); // Ensure you have a way to access the original image
+        } else {
+            onApplyCanny(lowThreshold, highThreshold, kernelSizeSlider->GetValue());
+        }
+    });
+
+    highThresholdCtrl->Bind(wxEVT_TEXT, [this, lowThresholdCtrl, highThresholdCtrl, kernelSizeSlider](wxCommandEvent& event) {
+        long lowThreshold = wxAtol(lowThresholdCtrl->GetValue());
+        long highThreshold = wxAtol(highThresholdCtrl->GetValue());
+        if (lowThreshold == 0 && highThreshold == 0) {
+            // Reload original image if both thresholds are set to zero
+            mainImage = originalImage.clone(); // Ensure you have a way to access the original image
+        } else {
+            onApplyCanny(lowThreshold, highThreshold, kernelSizeSlider->GetValue());
+        }
+    });
+
+    kernelSizeSlider->Bind(wxEVT_SCROLL_THUMBTRACK, [this, lowThresholdCtrl, highThresholdCtrl, kernelSizeSlider](wxScrollEvent& event) {
         onApplyCanny(wxAtol(lowThresholdCtrl->GetValue()), wxAtol(highThresholdCtrl->GetValue()), kernelSizeSlider->GetValue());
     });
 }
 
-
-
-void EditorPanel::onApplyLighten() {
+void EditorPanel::onApplyLightenDarken(int adjustment) {
     if (mainImage.empty()) {
         wxMessageBox("No image loaded.");
         return;
     }
 
-    int channels = mainImage.channels();
-    int rows = mainImage.rows;
-    int cols = mainImage.cols * channels;
+    cv::Mat tempImage = originalImage.clone(); // Start from the original image to apply changes
+    tempImage.forEach<uchar>([adjustment](uchar &pixel, const int* position) -> void {
+        pixel = std::clamp(static_cast<int>(pixel) + adjustment, 0, 255);
+    });
 
-    for (int i = 0; i < rows; i++) {
-        uchar* data = mainImage.ptr<uchar>(i);
-        for (int j = 0; j < cols; j++) {
-            data[j] = std::min(255, data[j] + 5);
-        }
-    }
+    mainImage = tempImage;
     displayMainImageToPanel();
-
 }
+
 
 void EditorPanel::onApplyErodeDilate(bool erode, bool dilate, int kernelSize) {
     if (mainImage.empty()) {
@@ -277,28 +318,15 @@ void EditorPanel::onApplyErodeDilate(bool erode, bool dilate, int kernelSize) {
         return;
     }
 
-    if (!erode && !dilate) {
-        wxMessageBox("Please select either Erode or Dilate.");
-        return;
-    }
-
-    if (erode && dilate) {
-        wxMessageBox("Please select only one of Erode or Dilate.");
-        return;
-    }
-
-    // Ensure the kernel size is odd
-    if (kernelSize % 2 == 0) {
-        kernelSize += 1;
-    }
+    if (kernelSize % 2 == 0) kernelSize += 1;
 
     cv::Mat result;
     cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(kernelSize, kernelSize));
 
     if (erode) {
-        cv::erode(mainImage, result, element);
+        cv::erode(originalImage, result, element);
     } else if (dilate) {
-        cv::dilate(mainImage, result, element);
+        cv::dilate(originalImage, result, element);
     }
 
     mainImage = result;
@@ -311,9 +339,16 @@ void EditorPanel::onApplyResize(bool resizeByFactor, int factor, const wxString&
         return;
     }
 
+    if ((resizeByFactor && factor == 1) || (!resizeByFactor && (wxAtoi(widthStr) == 0 || wxAtoi(heightStr) == 0))) {
+        // Reset to original image if no resizing is needed
+        mainImage = originalImage.clone();
+        displayMainImageToPanel();
+        return;
+    }
+
     cv::Mat resizedImage;
     if (resizeByFactor) {
-        cv::resize(mainImage, resizedImage, cv::Size(), factor, factor);
+        cv::resize(originalImage, resizedImage, cv::Size(), factor, factor);
     } else {
         int width = wxAtoi(widthStr);
         int height = wxAtoi(heightStr);
@@ -321,12 +356,13 @@ void EditorPanel::onApplyResize(bool resizeByFactor, int factor, const wxString&
             wxMessageBox("Invalid dimensions.");
             return;
         }
-        cv::resize(mainImage, resizedImage, cv::Size(width, height));
+        cv::resize(originalImage, resizedImage, cv::Size(width, height));
     }
 
     mainImage = resizedImage;
     displayMainImageToPanel();
 }
+
 
 void EditorPanel::onApplyCanny(long lowThreshold, long highThreshold, int kernelSize) {
     if (mainImage.empty()) {
@@ -336,15 +372,18 @@ void EditorPanel::onApplyCanny(long lowThreshold, long highThreshold, int kernel
 
     // Ensure the kernel size is odd
     if (kernelSize % 2 == 0) {
-        wxMessageBox("Kernel size must be odd.");
-        return;
+        kernelSize += 1;
     }
 
-    cv::Mat edges;
-    cv::Canny(mainImage, edges, lowThreshold, highThreshold, kernelSize);
-
-    mainImage = edges;
-    displayMainImageToPanel();
+    if (lowThreshold == 0 && highThreshold == 0) {
+        mainImage = originalImage.clone(); // Restaure l'image originale
+        displayMainImageToPanel();
+    } else {
+        cv::Mat edges;
+        cv::Canny(mainImage, edges, lowThreshold, highThreshold, kernelSize);
+        mainImage = edges;
+        displayMainImageToPanel();
+    }
 }
 
 

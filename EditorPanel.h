@@ -11,6 +11,7 @@
 class EditorPanel : public wxPanel
 {
     cv::Mat mainImage;
+    cv::Mat originalImage;
     wxPanel* menuPanel;
     wxPanel* imagePanel;
     wxPanel* subMenuPanel;
@@ -27,12 +28,12 @@ public:
 
     void onButtonClicked(wxCommandEvent &event, int id);
 
-    void createLightenSubmenu();
+    void createLightenDarkenSubmenu();
     void createErodeDilateSubmenu();
     void createResizeSubmenu();
     void createCannySubmenu();
 
-    void onApplyLighten();
+    void onApplyLightenDarken(int adjustment);
     void onApplyOpenCVFunction();
     void onApplyErodeDilate(bool erode, bool dilate, int kernelSize);
     void onApplyResize(bool resizeByFactor, int factor, const wxString& widthStr, const wxString& heightStr);
