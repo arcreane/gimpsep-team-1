@@ -142,7 +142,7 @@ void EditorPanel::createLightenDarkenSubmenu() {
     subMenuPanel->Layout();
 
     // Update the display as the slider moves
-    brightnessSlider->Bind(wxEVT_SLIDER, [this, brightnessSlider, sliderValueDisplay](wxCommandEvent& event) {
+        brightnessSlider->Bind(wxEVT_SCROLL_THUMBTRACK, [this, brightnessSlider, sliderValueDisplay](wxScrollEvent& event) {
         int value = brightnessSlider->GetValue();
         sliderValueDisplay->SetLabel(wxString::Format(wxT("%d"), value));
         onApplyLightenDarken(value);
@@ -303,9 +303,11 @@ void EditorPanel::onApplyLightenDarken(int adjustment) {
     }
 
     cv::Mat tempImage = originalImage.clone(); // Start from the original image to apply changes
+    /*
     tempImage.forEach<uchar>([adjustment](uchar &pixel, const int* position) -> void {
-        pixel = std::clamp(static_cast<int>(pixel) + adjustment, 0, 255);
+        //pixel = std::min(static_cast<int>(pixel) + adjustment, 255);
     });
+     */
 
     mainImage = tempImage;
     displayMainImageToPanel();
