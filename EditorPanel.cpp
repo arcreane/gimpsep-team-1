@@ -141,12 +141,12 @@ void EditorPanel::createLightenDarkenSubmenu() {
     subMenuPanel->SetSizer(sizer);
     subMenuPanel->Layout();
 
-    // Update the display as the slider moves
-        brightnessSlider->Bind(wxEVT_SCROLL_THUMBTRACK, [this, brightnessSlider, sliderValueDisplay](wxScrollEvent& event) {
-        int value = brightnessSlider->GetValue();
-        sliderValueDisplay->SetLabel(wxString::Format(wxT("%d"), value));
-        onApplyLightenDarken(value);
+    brightnessSlider->Bind(wxEVT_COMMAND_SLIDER_UPDATED, [this, brightnessSlider, sliderValueDisplay](wxCommandEvent& event) {
+    int value = brightnessSlider->GetValue();
+    sliderValueDisplay->SetLabel(wxString::Format(wxT("%d"), value));
+    onApplyLightenDarken(value);
     });
+
 }
 
 
@@ -302,16 +302,24 @@ void EditorPanel::onApplyLightenDarken(int adjustment) {
         return;
     }
 
-    cv::Mat tempImage = originalImage.clone(); // Start from the original image to apply changes
-    /*
-    tempImage.forEach<uchar>([adjustment](uchar &pixel, const int* position) -> void {
-        //pixel = std::min(static_cast<int>(pixel) + adjustment, 255);
-    });
-     */
+    cv::Mat tempImage = originalImage.clone();
 
-    mainImage = tempImage;
+    cv::Mat tempImageYCrCb;
+    cv::cvtColor(tempImage, tempImageYCrCb, cv::COLOR_BGR2YCrCb);
+
+    for (int i = 0; i < tempImageYCrCb.rows; i++) {
+        for (int j = 0; j < tempImageYCrCb.cols; j++) {
+            uchar& Y = tempImageYCrCb.at<cv::Vec3b>(i, j)[0];
+            int newY = Y + adjustment;
+            Y = cv::saturate_cast<uchar>(newY);
+        }
+    }
+
+    cv::cvtColor(tempImageYCrCb, mainImage, cv::COLOR_YCrCb2BGR);
+
     displayMainImageToPanel();
 }
+
 
 
 void EditorPanel::onApplyErodeDilate(bool erode, bool dilate, int kernelSize) {
@@ -372,13 +380,12 @@ void EditorPanel::onApplyCanny(long lowThreshold, long highThreshold, int kernel
         return;
     }
 
-    // Ensure the kernel size is odd
     if (kernelSize % 2 == 0) {
         kernelSize += 1;
     }
 
     if (lowThreshold == 0 && highThreshold == 0) {
-        mainImage = originalImage.clone(); // Restaure l'image originale
+        mainImage = originalImage.clone();
         displayMainImageToPanel();
     } else {
         cv::Mat edges;
