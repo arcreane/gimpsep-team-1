@@ -8,6 +8,6 @@
 #include <opencv2/opencv.hpp>
 #include <wx/image.h>
 
-wxImage MatToWxImage(const cv::Mat& mat);
+wxImage cvMatToWxImage(const cv::Mat& mat);
 
 #endif //GIMPSEP_TEAM_1_MANIPULATION_H

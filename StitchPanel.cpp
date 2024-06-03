@@ -45,7 +45,7 @@ void StitchPanel::displayImageList() {
         cv::Mat scaledImage;
         cv::resize(image, scaledImage, cv::Size(newWidth, newHeight));
 
-        wxImage wximage = MatToWxImage(scaledImage);
+        wxImage wximage = cvMatToWxImage(scaledImage);
         wxBitmap bitmap(wximage);
         imagesSizer->Add(new wxStaticBitmap(imagesPanel, wxID_ANY, bitmap), 0, wxALIGN_CENTER | wxALL, 0);
     }
@@ -70,7 +70,7 @@ void StitchPanel::stitchImages() {
         cv::Mat scaledResult;
         cv::resize(stitchedImage, scaledResult, cv::Size(newWidth, newHeight));
 
-        wxBitmap bitmap(MatToWxImage(scaledResult));
+        wxBitmap bitmap(cvMatToWxImage(scaledResult));
         auto* stitchedBitmap = new wxStaticBitmap(imagesPanel, wxID_ANY, bitmap);
         auto* stitchedImageSizer = new wxBoxSizer(wxVERTICAL);
         stitchedImageSizer->Add(stitchedBitmap, 1, wxEXPAND);
