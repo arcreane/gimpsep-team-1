@@ -23,7 +23,7 @@ public:
     void setEditorPanelImage(cv::Mat);
     cv::Mat getEditedImage();
     cv::Mat getStitchedImage();
-    void addImageToStitcherList(cv::Mat inImage);
+    void addImageToStitcherList(const cv::Mat& inImage);
 private:
     wxBoxSizer* vBoxSizer;
     wxMenuBar* menuBar;

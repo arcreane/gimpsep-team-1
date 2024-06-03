@@ -1,6 +1,3 @@
-//
-// Created by ghisl on 08/05/2024.
-//
 
 #include "StitchPanel.h"
 #include "MainFrame.h"
@@ -25,7 +22,6 @@ StitchPanel::StitchPanel(wxWindow* parent) : wxPanel(parent, wxID_ANY) {
     vBoxSizer->Layout();
     SetSizer(vBoxSizer);
 
-    SetBackgroundColour(*wxWHITE);
 }
 
 void StitchPanel::addImageToList(const cv::Mat& inImage) {
@@ -66,6 +62,7 @@ void StitchPanel::stitchImages() {
 
     if (status == cv::Stitcher::OK) {
         imagesPanel->DestroyChildren();
+        images.clear();
 
         double scaleFactor = std::min(1050.0 / stitchedImage.cols, 600.0 / stitchedImage.rows);
         int newWidth = scaleFactor * stitchedImage.cols;
@@ -74,7 +71,7 @@ void StitchPanel::stitchImages() {
         cv::resize(stitchedImage, scaledResult, cv::Size(newWidth, newHeight));
 
         wxBitmap bitmap(MatToWxImage(scaledResult));
-        wxStaticBitmap* stitchedBitmap = new wxStaticBitmap(imagesPanel, wxID_ANY, bitmap);
+        auto* stitchedBitmap = new wxStaticBitmap(imagesPanel, wxID_ANY, bitmap);
         auto* stitchedImageSizer = new wxBoxSizer(wxVERTICAL);
         stitchedImageSizer->Add(stitchedBitmap, 1, wxEXPAND);
         imagesPanel->SetSizer(stitchedImageSizer);
@@ -96,7 +93,6 @@ void StitchPanel::refreshDisplay() {
 void StitchPanel::removeLastImage() {
     if(!stitchedImage.empty()){
         stitchedImage.release();
-        images.clear();
         imagesPanel->DestroyChildren();
         imagesSizer = new wxGridSizer(2, 3, 0, 0);
         imagesPanel->SetSizer(imagesSizer);

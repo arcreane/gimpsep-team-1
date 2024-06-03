@@ -83,14 +83,13 @@ void MainFrame::loadStitcherPanel() {
 void MainFrame::setEditorPanelImage(cv::Mat inImage) {
     editorPanel->setImage(std::move(inImage));
     editorPanel->displayMainImageToPanel();
-
 }
 
 cv::Mat MainFrame::getEditedImage() {
     return editorPanel->getImage();
 }
 
-void MainFrame::addImageToStitcherList(cv::Mat inImage){
+void MainFrame::addImageToStitcherList(const cv::Mat& inImage){
     stitchPanel->addImageToList(inImage);
     stitchPanel->displayImageList();
 }
