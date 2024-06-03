@@ -7,7 +7,7 @@
 
 EditorPanel::EditorPanel(wxWindow* parent) : wxPanel(parent, wxID_ANY) {
 
-    wxBoxSizer* mainSizer = new wxBoxSizer(wxHORIZONTAL);
+    auto* mainSizer = new wxBoxSizer(wxHORIZONTAL);
 
     menuPanel = new wxPanel(this, wxID_ANY);
     menuPanel->SetBackgroundColour(*wxLIGHT_GREY);
@@ -206,7 +206,7 @@ void EditorPanel::createResizeSubmenu() {
     subMenuPanel->Layout();
     menuPanel->Layout();
 
-    factorSlider->Bind(wxEVT_SCROLL_THUMBTRACK, [this, factorRadioButton, widthCtrl, heightCtrl, factorSlider](wxScrollEvent& event) {
+    factorSlider->Bind(wxEVT_SCROLL_THUMBTRACK, [this, factorRadioButton, factorSlider](wxScrollEvent& event) {
         if (factorRadioButton->GetValue()) {
             onApplyResize(true, factorSlider->GetValue(), "", "");
         }
