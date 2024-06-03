@@ -151,12 +151,12 @@ void EditorPanel::createErodeDilateSubmenu() {
 
     subMenuPanel->DestroyChildren();
 
-    wxStaticText* text = new wxStaticText(subMenuPanel, wxID_ANY, wxT("Erode / Dilate Options"));
-    wxRadioButton* erodeRadioButton = new wxRadioButton(subMenuPanel, wxID_ANY, wxT("Erode"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
-    wxRadioButton* dilateRadioButton = new wxRadioButton(subMenuPanel, wxID_ANY, wxT("Dilate"));
-    wxSlider* kernelSizeSlider = new wxSlider(subMenuPanel, wxID_ANY, 3, 1, 21, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
+    auto* text = new wxStaticText(subMenuPanel, wxID_ANY, wxT("Erode / Dilate Options"));
+    auto* erodeRadioButton = new wxRadioButton(subMenuPanel, wxID_ANY, wxT("Erode"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
+    auto* dilateRadioButton = new wxRadioButton(subMenuPanel, wxID_ANY, wxT("Dilate"));
+    auto* kernelSizeSlider = new wxSlider(subMenuPanel, wxID_ANY, 3, 1, 21, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
 
-    wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+    auto* sizer = new wxBoxSizer(wxVERTICAL);
     sizer->Add(text, 0, wxALL, 5);
     sizer->Add(erodeRadioButton, 0, wxALL, 5);
     sizer->Add(dilateRadioButton, 0, wxALL, 5);
@@ -182,16 +182,16 @@ void EditorPanel::createResizeSubmenu() {
 
     subMenuPanel->DestroyChildren();
 
-    wxStaticText* text = new wxStaticText(subMenuPanel, wxID_ANY, wxT("Resize Options"));
-    wxRadioButton* factorRadioButton = new wxRadioButton(subMenuPanel, wxID_ANY, wxT("Resize by Factor"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
-    wxRadioButton* dimensionsRadioButton = new wxRadioButton(subMenuPanel, wxID_ANY, wxT("Resize by Dimensions"));
+    auto* text = new wxStaticText(subMenuPanel, wxID_ANY, wxT("Resize Options"));
+    auto* factorRadioButton = new wxRadioButton(subMenuPanel, wxID_ANY, wxT("Resize by Factor"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
+    auto* dimensionsRadioButton = new wxRadioButton(subMenuPanel, wxID_ANY, wxT("Resize by Dimensions"));
 
-    wxSlider* factorSlider = new wxSlider(subMenuPanel, wxID_ANY, 1, 1, 10, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
-    wxTextCtrl* widthCtrl = new wxTextCtrl(subMenuPanel, wxID_ANY);
-    wxTextCtrl* heightCtrl = new wxTextCtrl(subMenuPanel, wxID_ANY);
-    wxButton* applyButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Apply"));
+    auto* factorSlider = new wxSlider(subMenuPanel, wxID_ANY, 1, 1, 10, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
+    auto* widthCtrl = new wxTextCtrl(subMenuPanel, wxID_ANY);
+    auto* heightCtrl = new wxTextCtrl(subMenuPanel, wxID_ANY);
+    auto* applyButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Apply"));
 
-    wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+    auto* sizer = new wxBoxSizer(wxVERTICAL);
     sizer->Add(text, 0, wxALL, 5);
     sizer->Add(factorRadioButton, 0, wxALL, 5);
     sizer->Add(factorSlider, 0, wxEXPAND | wxALL, 5);
@@ -236,12 +236,12 @@ void EditorPanel::createCannySubmenu() {
 
     subMenuPanel->DestroyChildren();
 
-    wxStaticText* text = new wxStaticText(subMenuPanel, wxID_ANY, wxT("Canny Edge Detection"));
-    wxTextCtrl* lowThresholdCtrl = new wxTextCtrl(subMenuPanel, wxID_ANY);
-    wxTextCtrl* highThresholdCtrl = new wxTextCtrl(subMenuPanel, wxID_ANY);
-    wxSlider* kernelSizeSlider = new wxSlider(subMenuPanel, wxID_ANY, 3, 1, 7, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
+    auto* text = new wxStaticText(subMenuPanel, wxID_ANY, wxT("Canny Edge Detection"));
+    auto* lowThresholdCtrl = new wxTextCtrl(subMenuPanel, wxID_ANY);
+    auto* highThresholdCtrl = new wxTextCtrl(subMenuPanel, wxID_ANY);
+    auto* kernelSizeSlider = new wxSlider(subMenuPanel, wxID_ANY, 3, 1, 7, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
 
-    wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+    auto* sizer = new wxBoxSizer(wxVERTICAL);
     sizer->Add(text, 0, wxALL, 5);
     sizer->Add(new wxStaticText(subMenuPanel, wxID_ANY, wxT("Low Threshold")), 0, wxALL, 5);
     sizer->Add(lowThresholdCtrl, 0, wxEXPAND | wxALL, 5);
@@ -389,11 +389,12 @@ void EditorPanel::onApplyCanny(long lowThreshold, long highThreshold, int kernel
     }
 }
 
-
+/*
 void EditorPanel::onApplyOpenCVFunction() {
     //Soit faire cv::Mat newImage = cv::AppliquerFonction(parametres)
     //mainImage = newImage;
     //Soit mainImage = cv::AppliquerFonction(params)
     displayMainImageToPanel();
 }
+ */
 

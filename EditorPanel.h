@@ -25,7 +25,6 @@ public:
     cv::Mat getImage();
 
     void displayMainImageToPanel();
-
     void onButtonClicked(wxCommandEvent &event, int id);
 
     void createLightenDarkenSubmenu();
@@ -34,7 +33,6 @@ public:
     void createCannySubmenu();
 
     void onApplyLightenDarken(int adjustment);
-    void onApplyOpenCVFunction();
     void onApplyErodeDilate(bool erode, bool dilate, int kernelSize);
     void onApplyResize(bool resizeByFactor, int factor, const wxString& widthStr, const wxString& heightStr);
     void onApplyCanny(long lowThreshold, long highThreshold, int kernelSize);
