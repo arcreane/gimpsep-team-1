@@ -6,30 +6,34 @@
 #include "MainFrame.h"
 
 MenuPanel::MenuPanel(wxWindow* parent) : wxPanel(parent, wxID_ANY) {
-    wxStaticText* title = new wxStaticText(this, wxID_ANY, wxT("Choose an option:"));
 
-    gotoEditorButton = new wxButton(this, wxID_ANY, wxT("Editor"));
-    gotoStitcherButton = new wxButton(this, wxID_ANY, wxT("Stitcher"));
-    gotoEditorButton->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MenuPanel::OnGotoEditorButtonClicked, this);
-    gotoStitcherButton->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MenuPanel::OnGotoStitcherButtonClicked, this);
+    wxFont font(20, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
+    auto* title = new wxStaticText(this, wxID_ANY, wxT("Gimpsep T1"));
+    title->SetFont(font);
 
-    wxBoxSizer* hBoxSizer = new wxBoxSizer(wxHORIZONTAL);
-    hBoxSizer->Add(gotoEditorButton, 0, wxALL, 5);
-    hBoxSizer->Add(gotoStitcherButton, 0, wxALL, 5);
+    editorBtn = new wxButton(this, wxID_ANY, wxT("Edit an image"));
+    stitcherBtn = new wxButton(this, wxID_ANY, wxT("Stitch images"));
+    editorBtn->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MenuPanel::onEditorBtnClk, this);
+    stitcherBtn->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MenuPanel::onStitcherBtnClk, this);
 
-    wxBoxSizer* vBoxSizer = new wxBoxSizer(wxVERTICAL);
+    auto* hBoxSizer = new wxBoxSizer(wxHORIZONTAL);
+    hBoxSizer->Add(editorBtn, 0, wxALL, 5);
+    hBoxSizer->Add(stitcherBtn, 0, wxALL, 5);
+
+    auto* vBoxSizer = new wxBoxSizer(wxVERTICAL);
     vBoxSizer->AddStretchSpacer();
     vBoxSizer->Add(title, 0, wxALIGN_CENTER_HORIZONTAL, 0);
+    vBoxSizer->AddSpacer(15);
     vBoxSizer->Add(hBoxSizer, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
     vBoxSizer->AddStretchSpacer();
 
     SetSizer(vBoxSizer);
 }
 
-void MenuPanel::OnGotoEditorButtonClicked(wxCommandEvent& event) {
+void MenuPanel::onEditorBtnClk(wxCommandEvent& event) {
     dynamic_cast<MainFrame*>(GetParent())->loadEditorPanel();
 }
 
-void MenuPanel::OnGotoStitcherButtonClicked(wxCommandEvent& event) {
+void MenuPanel::onStitcherBtnClk(wxCommandEvent& event) {
     dynamic_cast<MainFrame*>(GetParent())->loadStitcherPanel();
 }

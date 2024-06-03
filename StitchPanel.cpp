@@ -1,6 +1,3 @@
-//
-// Created by ghisl on 08/05/2024.
-//
 
 #include "StitchPanel.h"
 #include "MainFrame.h"
@@ -25,7 +22,6 @@ StitchPanel::StitchPanel(wxWindow* parent) : wxPanel(parent, wxID_ANY) {
     vBoxSizer->Layout();
     SetSizer(vBoxSizer);
 
-    SetBackgroundColour(*wxWHITE);
 }
 
 void StitchPanel::addImageToList(const cv::Mat& inImage) {
@@ -49,7 +45,7 @@ void StitchPanel::displayImageList() {
         cv::Mat scaledImage;
         cv::resize(image, scaledImage, cv::Size(newWidth, newHeight));
 
-        wxImage wximage = MatToWxImage(scaledImage);
+        wxImage wximage = cvMatToWxImage(scaledImage);
         wxBitmap bitmap(wximage);
         imagesSizer->Add(new wxStaticBitmap(imagesPanel, wxID_ANY, bitmap), 0, wxALIGN_CENTER | wxALL, 0);
     }
@@ -66,6 +62,7 @@ void StitchPanel::stitchImages() {
 
     if (status == cv::Stitcher::OK) {
         imagesPanel->DestroyChildren();
+        images.clear();
 
         double scaleFactor = std::min(1050.0 / stitchedImage.cols, 600.0 / stitchedImage.rows);
         int newWidth = scaleFactor * stitchedImage.cols;
@@ -73,8 +70,8 @@ void StitchPanel::stitchImages() {
         cv::Mat scaledResult;
         cv::resize(stitchedImage, scaledResult, cv::Size(newWidth, newHeight));
 
-        wxBitmap bitmap(MatToWxImage(scaledResult));
-        wxStaticBitmap* stitchedBitmap = new wxStaticBitmap(imagesPanel, wxID_ANY, bitmap);
+        wxBitmap bitmap(cvMatToWxImage(scaledResult));
+        auto* stitchedBitmap = new wxStaticBitmap(imagesPanel, wxID_ANY, bitmap);
         auto* stitchedImageSizer = new wxBoxSizer(wxVERTICAL);
         stitchedImageSizer->Add(stitchedBitmap, 1, wxEXPAND);
         imagesPanel->SetSizer(stitchedImageSizer);
@@ -83,9 +80,7 @@ void StitchPanel::stitchImages() {
         imagesPanel->Layout();
         refreshDisplay();
     } else {
-        wxString message(wxT("Error during stitching: "));
-        message += wxString::Format(wxT("%d"), status);
-        message += ". Please try again.";
+        wxString message(wxT("An error occured. Please try again with 2-6 images sharing similarities."));
         wxMessageBox(message, wxT("Stitching error"));
     }
 }
@@ -98,7 +93,6 @@ void StitchPanel::refreshDisplay() {
 void StitchPanel::removeLastImage() {
     if(!stitchedImage.empty()){
         stitchedImage.release();
-        images.clear();
         imagesPanel->DestroyChildren();
         imagesSizer = new wxGridSizer(2, 3, 0, 0);
         imagesPanel->SetSizer(imagesSizer);

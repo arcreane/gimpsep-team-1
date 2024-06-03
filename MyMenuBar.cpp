@@ -9,7 +9,7 @@ MyMenuBar::MyMenuBar(wxPanel* panel) {
 
     contentPanel = panel;
     auto* menuMenu = new wxMenu();
-    menuMenu->Append(0, wxT("Main menu"));
+    menuMenu->Append(0, wxT("Go to menu"));
     auto* lsMenu = new wxMenu();
     lsMenu->Append(1, wxT("Load Image"));
     lsMenu->Append(2, wxT("Save Image"));
@@ -61,7 +61,7 @@ void MyMenuBar::onLoadImageClk(wxCommandEvent &event) {
 
 void MyMenuBar::onSaveImageClk(wxCommandEvent &event) {
 
-    wxFileDialog dialog(this, "Save image as", "", "", "Image files (*.jpg, *.jpeg, *.png)|*.jpg;*.jpeg;*.png", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+    wxFileDialog dialog(this, "Save image as", "", "stiched.jpg", "Image files (*.jpg, *.png)|*.jpg;*.png", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
     cv::Mat image;
 
     switch (dynamic_cast<MainFrame*>(GetParent())->getCurrentPanel()) {
@@ -73,6 +73,10 @@ void MyMenuBar::onSaveImageClk(wxCommandEvent &event) {
             break;
         case 2:
             image = dynamic_cast<MainFrame*>(GetParent())->getStitchedImage();
+            if(image.empty()){
+                wxMessageBox("Please stitch images first.", "No image.", wxICON_INFORMATION);
+                return;
+            }
             break;
 
     }

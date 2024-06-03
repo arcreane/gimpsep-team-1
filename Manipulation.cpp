@@ -4,7 +4,7 @@
 
 #include "Manipulation.h"
 
-wxImage MatToWxImage(const cv::Mat& mat)
+wxImage cvMatToWxImage(const cv::Mat& mat)
 {
     wxImage img(mat.cols, mat.rows);
 

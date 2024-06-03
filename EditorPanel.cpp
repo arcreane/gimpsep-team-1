@@ -45,7 +45,7 @@ void EditorPanel::setImage(cv::Mat inImage) {
 }
 
 void EditorPanel::displayMainImageToPanel(){
-    wxImage image = MatToWxImage(mainImage);
+    wxImage image = cvMatToWxImage(mainImage);
 
     int width = imagePanel->GetSize().GetWidth();
     int height = imagePanel->GetSize().GetHeight();
