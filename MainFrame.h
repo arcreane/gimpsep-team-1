@@ -25,12 +25,13 @@ public:
     cv::Mat getStitchedImage();
     void addImageToStitcherList(cv::Mat inImage);
 private:
+    wxBoxSizer* vBoxSizer;
     wxMenuBar* menuBar;
+    wxPanel* contentPanel;
     MenuPanel* menuPanel;
     EditorPanel* editorPanel;
     StitchPanel* stitchPanel;
-    wxPanel* contentPanel;
-    wxBoxSizer* vBoxSizer;
+
 
     void setContentPanel(wxPanel* panel);
 };

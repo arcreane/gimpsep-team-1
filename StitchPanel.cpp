@@ -83,9 +83,7 @@ void StitchPanel::stitchImages() {
         imagesPanel->Layout();
         refreshDisplay();
     } else {
-        wxString message(wxT("Error during stitching: "));
-        message += wxString::Format(wxT("%d"), status);
-        message += ". Please try again.";
+        wxString message(wxT("An error occured. Please try again with 2-6 images sharing similarities."));
         wxMessageBox(message, wxT("Stitching error"));
     }
 }

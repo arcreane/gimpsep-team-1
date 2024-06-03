@@ -8,11 +8,11 @@
 MenuPanel::MenuPanel(wxWindow* parent) : wxPanel(parent, wxID_ANY) {
 
     wxFont font(20, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
-    auto* title = new wxStaticText(this, wxID_ANY, wxT("Choose an option:"));
+    auto* title = new wxStaticText(this, wxID_ANY, wxT("Gimpsep T1"));
     title->SetFont(font);
 
-    editorBtn = new wxButton(this, wxID_ANY, wxT("Editor"));
-    stitcherBtn = new wxButton(this, wxID_ANY, wxT("Stitcher"));
+    editorBtn = new wxButton(this, wxID_ANY, wxT("Edit an image"));
+    stitcherBtn = new wxButton(this, wxID_ANY, wxT("Stitch images"));
     editorBtn->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MenuPanel::onEditorBtnClk, this);
     stitcherBtn->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &MenuPanel::onStitcherBtnClk, this);
 
