@@ -44,13 +44,13 @@ int MainFrame::getCurrentPanel() {
     }
 }
 
-void MainFrame::SetContentPanel(wxPanel* newPanel) {
+void MainFrame::setContentPanel(wxPanel* panel) {
     if (contentPanel != nullptr) {
         vBoxSizer->Detach(contentPanel);
         contentPanel->Hide();
     }
-    if (newPanel != contentPanel) {
-        contentPanel = newPanel;
+    if (panel != contentPanel) {
+        contentPanel = panel;
         vBoxSizer->Add(contentPanel, 1, wxEXPAND | wxALL, 5);
     }
     contentPanel->Show();
@@ -66,28 +66,36 @@ void MainFrame::hideImageIOMenu() {
 }
 
 void MainFrame::loadMenuPanel() {
-    SetContentPanel(menuPanel);
+    setContentPanel(menuPanel);
     hideImageIOMenu();
 }
 
 void MainFrame::loadEditorPanel() {
-    SetContentPanel(editorPanel);
+    setContentPanel(editorPanel);
     loadImageIOMenu();
 }
 
 void MainFrame::loadStitcherPanel() {
-    SetContentPanel(stitchPanel);
-    loadMenuPanel();
+    setContentPanel(stitchPanel);
+    loadImageIOMenu();
 }
 
 void MainFrame::setEditorPanelImage(cv::Mat inImage) {
     editorPanel->setImage(std::move(inImage));
     editorPanel->displayMainImageToPanel();
-
 }
 
 cv::Mat MainFrame::getEditedImage() {
     return editorPanel->getImage();
+}
+
+void MainFrame::addImageToStitcherList(const cv::Mat& inImage){
+    stitchPanel->addImageToList(inImage);
+    stitchPanel->displayImageList();
+}
+
+cv::Mat MainFrame::getStitchedImage() {
+    return stitchPanel->getStitchedImage();
 }
 
 

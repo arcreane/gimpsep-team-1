@@ -6,13 +6,12 @@
 #define GIMPSEP_TEAM_1_GIMPISEP_H
 
 
-#include <wx/wx.h>
+#include <wx/app.h>
 
 class GimpIsep : public wxApp
 {
 public:
     virtual bool OnInit();
-
 };
 
 

@@ -22,15 +22,18 @@ public:
     void loadStitcherPanel();
     void setEditorPanelImage(cv::Mat);
     cv::Mat getEditedImage();
+    cv::Mat getStitchedImage();
+    void addImageToStitcherList(const cv::Mat& inImage);
 private:
+    wxBoxSizer* vBoxSizer;
     wxMenuBar* menuBar;
+    wxPanel* contentPanel;
     MenuPanel* menuPanel;
     EditorPanel* editorPanel;
     StitchPanel* stitchPanel;
-    wxPanel* contentPanel;
-    wxBoxSizer* vBoxSizer;
 
-    void SetContentPanel(wxPanel* panel);
+
+    void setContentPanel(wxPanel* panel);
 };
 
 
