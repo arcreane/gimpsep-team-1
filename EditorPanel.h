@@ -21,7 +21,7 @@ class EditorPanel : public wxPanel
     wxGridSizer * createButtonGrid();
 public:
     explicit EditorPanel(wxWindow* parent);
-    void setImage(cv::Mat);
+    void setImage(const cv::Mat&);
     cv::Mat getImage();
 
     void displayMainImageToPanel();
