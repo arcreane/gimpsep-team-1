@@ -32,7 +32,7 @@ private:
     wxPanel* contentPanel;
     wxBoxSizer* vBoxSizer;
 
-    void SetContentPanel(wxPanel* panel);
+    void setContentPanel(wxPanel* panel);
 };
 
 
