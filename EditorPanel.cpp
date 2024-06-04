@@ -42,6 +42,10 @@ void EditorPanel::setImage(const cv::Mat& inImage) {
     originalImage = inImage.clone(); //Clone l'image
 }
 
+cv::Mat EditorPanel::getImage() {
+    return mainImage;
+}
+
 void EditorPanel::displayMainImageToPanel(){
     wxImage image = cvMatToWxImage(mainImage);
 
@@ -92,12 +96,7 @@ wxGridSizer * EditorPanel::createButtonGrid() {
     buttonGrid->Add(button5, 0, wxEXPAND | wxALL, 3);
     button5->Bind(wxEVT_BUTTON, [this, button5ID](wxCommandEvent& event) { onButtonClicked(event, button5ID); });
 
-
     return buttonGrid;
-}
-
-cv::Mat EditorPanel::getImage() {
-    return mainImage;
 }
 
 void EditorPanel::onButtonClicked(wxCommandEvent &event, int buttonId) {
@@ -447,13 +446,4 @@ void EditorPanel::onApplyGrayscale(int numLevels) {
     displayMainImageToPanel();
 }
 
-
-/*
-void EditorPanel::onApplyOpenCVFunction() {
-    //Soit faire cv::Mat newImage = cv::AppliquerFonction(parametres)
-    //mainImage = newImage;
-    //Soit mainImage = cv::AppliquerFonction(params)
-    displayMainImageToPanel();
-}
- */
 
