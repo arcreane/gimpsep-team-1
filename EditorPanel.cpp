@@ -5,6 +5,7 @@
 #include "EditorPanel.h"
 #include "MainFrame.h"
 #include "Manipulation.h"
+#include <opencv2/imgproc/imgproc.hpp>
 
 EditorPanel::EditorPanel(wxWindow* parent) : wxPanel(parent, wxID_ANY) {
 
@@ -37,15 +38,15 @@ EditorPanel::EditorPanel(wxWindow* parent) : wxPanel(parent, wxID_ANY) {
     SetSizeHints(wxDefaultSize, wxDefaultSize, wxSize(1200, 600));
 
     SetBackgroundColour(*wxWHITE);
-
 }
 
 void EditorPanel::setImage(cv::Mat inImage) {
     mainImage = inImage;
-    originalImage = inImage.clone(); //Clone l'image
+    originalImage = inImage.clone(); // Clone l'image
+    displayMainImageToPanel(); // Afficher l'image
 }
 
-void EditorPanel::displayMainImageToPanel(){
+void EditorPanel::displayMainImageToPanel() {
     wxImage image = cvMatToWxImage(mainImage);
 
     int width = imagePanel->GetSize().GetWidth();
@@ -79,7 +80,6 @@ wxGridSizer * EditorPanel::createButtonGrid() {
     buttonGrid->Add(button2, 0, wxALL, 5);
     button2->Bind(wxEVT_BUTTON, [this, button2ID](wxCommandEvent& event) { onButtonClicked(event, button2ID); });
 
-
     wxButton* button3 = new wxButton(menuPanel, wxID_ANY, wxT("Resize"));
     int button3ID = 3;
     buttonGrid->Add(button3, 0, wxALL, 5);
@@ -89,6 +89,11 @@ wxGridSizer * EditorPanel::createButtonGrid() {
     int button4ID = 4;
     buttonGrid->Add(button4, 0, wxALL, 5);
     button4->Bind(wxEVT_BUTTON, [this, button4ID](wxCommandEvent& event) { onButtonClicked(event, button4ID); });
+
+    wxButton* button5 = new wxButton(menuPanel, wxID_ANY, wxT("Black and white"));
+    int button5ID = 5;
+    buttonGrid->Add(button5, 0, wxALL, 5);
+    button5->Bind(wxEVT_BUTTON, [this, button5ID](wxCommandEvent& event) { onButtonClicked(event, button5ID); });
 
     return buttonGrid;
 }
@@ -115,7 +120,10 @@ void EditorPanel::onButtonClicked(wxCommandEvent &event, int buttonId) {
             break;
         case 4:
             createCannySubmenu();
-        break;
+            break;
+        case 5:
+            createBlackWhiteSubmenu();
+            break;
         default:
             wxMessageBox("Invalid button ID");
             break;
@@ -142,13 +150,11 @@ void EditorPanel::createLightenDarkenSubmenu() {
     subMenuPanel->Layout();
 
     brightnessSlider->Bind(wxEVT_COMMAND_SLIDER_UPDATED, [this, brightnessSlider, sliderValueDisplay](wxCommandEvent& event) {
-    int value = brightnessSlider->GetValue();
-    sliderValueDisplay->SetLabel(wxString::Format(wxT("%d"), value));
-    onApplyLightenDarken(value);
+        int value = brightnessSlider->GetValue();
+        sliderValueDisplay->SetLabel(wxString::Format(wxT("%d"), value));
+        onApplyLightenDarken(value);
     });
-
 }
-
 
 void EditorPanel::createErodeDilateSubmenu() {
     if (subMenuPanel == nullptr) {
@@ -296,6 +302,32 @@ void EditorPanel::createCannySubmenu() {
     });
 }
 
+void EditorPanel::createBlackWhiteSubmenu() {
+    if (subMenuPanel == nullptr) {
+        return;
+    }
+
+    subMenuPanel->DestroyChildren();
+
+    wxStaticText* text = new wxStaticText(subMenuPanel, wxID_ANY, wxT("Adjust Black and White Intensity (0 to 255)"));
+    wxSlider* bwSlider = new wxSlider(subMenuPanel, wxID_ANY, 128, 0, 255, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
+    wxStaticText* sliderValueDisplay = new wxStaticText(subMenuPanel, wxID_ANY, wxT("128"), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER_HORIZONTAL);
+
+    wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+    sizer->Add(text, 0, wxALL, 5);
+    sizer->Add(bwSlider, 0, wxEXPAND | wxALL, 5);
+    sizer->Add(sliderValueDisplay, 0, wxALL | wxEXPAND, 5);
+
+    subMenuPanel->SetSizer(sizer);
+    subMenuPanel->Layout();
+
+    bwSlider->Bind(wxEVT_COMMAND_SLIDER_UPDATED, [this, bwSlider, sliderValueDisplay](wxCommandEvent& event) {
+        int value = bwSlider->GetValue();
+        sliderValueDisplay->SetLabel(wxString::Format(wxT("%d"), value));
+        onApplyBlackWhite(value);
+    });
+}
+
 void EditorPanel::onApplyLightenDarken(int adjustment) {
     if (mainImage.empty()) {
         wxMessageBox("No image loaded.");
@@ -319,8 +351,6 @@ void EditorPanel::onApplyLightenDarken(int adjustment) {
 
     displayMainImageToPanel();
 }
-
-
 
 void EditorPanel::onApplyErodeDilate(bool erode, bool dilate, int kernelSize) {
     if (mainImage.empty()) {
@@ -373,7 +403,6 @@ void EditorPanel::onApplyResize(bool resizeByFactor, int factor, const wxString&
     displayMainImageToPanel();
 }
 
-
 void EditorPanel::onApplyCanny(long lowThreshold, long highThreshold, int kernelSize) {
     if (mainImage.empty()) {
         wxMessageBox("No image loaded.");
@@ -395,11 +424,23 @@ void EditorPanel::onApplyCanny(long lowThreshold, long highThreshold, int kernel
     }
 }
 
+void EditorPanel::onApplyBlackWhite(int intensity) {
+    if (mainImage.empty()) {
+        wxMessageBox("No image loaded.");
+        return;
+    }
+    cv::Mat grayImage;
+    cv::cvtColor(mainImage, grayImage, cv::COLOR_BGR2GRAY);
+    cv::Mat bwImage;
+    cv::threshold(grayImage, bwImage, intensity, 255, cv::THRESH_BINARY);
 
-void EditorPanel::onApplyOpenCVFunction() {
-    //Soit faire cv::Mat newImage = cv::AppliquerFonction(parametres)
-    //mainImage = newImage;
-    //Soit mainImage = cv::AppliquerFonction(params)
+    cv::cvtColor(bwImage, mainImage, cv::COLOR_GRAY2BGR);
     displayMainImageToPanel();
 }
 
+void EditorPanel::onApplyOpenCVFunction() {
+    // Soit faire cv::Mat newImage = cv::AppliquerFonction(parametres)
+    // mainImage = newImage;
+    // Soit mainImage = cv::AppliquerFonction(params)
+    displayMainImageToPanel();
+}
