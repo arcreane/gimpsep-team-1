@@ -42,6 +42,10 @@ void EditorPanel::setImage(const cv::Mat& inImage) {
     originalImage = inImage.clone(); //Clone l'image
 }
 
+cv::Mat EditorPanel::getImage() {
+    return mainImage;
+}
+
 void EditorPanel::displayMainImageToPanel(){
     wxImage image = cvMatToWxImage(mainImage);
 
@@ -69,29 +73,30 @@ wxGridSizer * EditorPanel::createButtonGrid() {
 
     auto* button1 = new wxButton(menuPanel, wxID_ANY, wxT("Lighten/Darken"));
     int button1ID = 1;
-    buttonGrid->Add(button1, 0, wxEXPAND | wxALL, 5);
+    buttonGrid->Add(button1, 0, wxEXPAND | wxALL, 3);
     button1->Bind(wxEVT_BUTTON, [this, button1ID](wxCommandEvent& event) { onButtonClicked(event, button1ID); });
 
     auto* button2 = new wxButton(menuPanel, wxID_ANY, wxT("Erode/Dilate"));
     int button2ID = 2;
-    buttonGrid->Add(button2, 0, wxEXPAND | wxALL, 5);
+    buttonGrid->Add(button2, 0, wxEXPAND | wxALL, 3);
     button2->Bind(wxEVT_BUTTON, [this, button2ID](wxCommandEvent& event) { onButtonClicked(event, button2ID); });
 
     auto* button3 = new wxButton(menuPanel, wxID_ANY, wxT("Resize"));
     int button3ID = 3;
-    buttonGrid->Add(button3, 0, wxEXPAND | wxALL, 5);
+    buttonGrid->Add(button3, 0, wxEXPAND | wxALL, 3);
     button3->Bind(wxEVT_BUTTON, [this, button3ID](wxCommandEvent& event) { onButtonClicked(event, button3ID); });
 
-    auto* button4 = new wxButton(menuPanel, wxID_ANY, wxT("Canny"));
+    auto* button4 = new wxButton(menuPanel, wxID_ANY, wxT("Canny edge\ndetection"));
     int button4ID = 4;
-    buttonGrid->Add(button4, 0, wxEXPAND | wxALL, 5);
+    buttonGrid->Add(button4, 0, wxEXPAND | wxALL, 3);
     button4->Bind(wxEVT_BUTTON, [this, button4ID](wxCommandEvent& event) { onButtonClicked(event, button4ID); });
 
-    return buttonGrid;
-}
+    auto* button5 = new wxButton(menuPanel, wxID_ANY, wxT("Grayscale"));
+    int button5ID = 5;
+    buttonGrid->Add(button5, 0, wxEXPAND | wxALL, 3);
+    button5->Bind(wxEVT_BUTTON, [this, button5ID](wxCommandEvent& event) { onButtonClicked(event, button5ID); });
 
-cv::Mat EditorPanel::getImage() {
-    return mainImage;
+    return buttonGrid;
 }
 
 void EditorPanel::onButtonClicked(wxCommandEvent &event, int buttonId) {
@@ -112,7 +117,10 @@ void EditorPanel::onButtonClicked(wxCommandEvent &event, int buttonId) {
             break;
         case 4:
             createCannySubmenu();
-        break;
+            break;
+        case 5:
+            createGrayscaleSubmenu();
+            break;
         default:
             wxMessageBox("Invalid button ID");
             break;
@@ -290,6 +298,29 @@ void EditorPanel::createCannySubmenu() {
     });
 }
 
+void EditorPanel::createGrayscaleSubmenu() {
+    if (subMenuPanel == nullptr) {
+        return;
+    }
+
+    subMenuPanel->DestroyChildren();
+
+    auto* text = new wxStaticText(subMenuPanel, wxID_ANY, wxT("Set number or grayscale levels (2-21)"));
+    auto* grayscaleSlider = new wxSlider(subMenuPanel, wxID_ANY, 12, 2, 22, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
+
+    auto* sizer = new wxBoxSizer(wxVERTICAL);
+    sizer->Add(text, 0, wxALL, 5);
+    sizer->Add(grayscaleSlider, 0, wxEXPAND | wxALL, 5);
+
+    subMenuPanel->SetSizer(sizer);
+    subMenuPanel->Layout();
+
+    grayscaleSlider->Bind(wxEVT_COMMAND_SLIDER_UPDATED, [this, grayscaleSlider](wxCommandEvent& event) {
+        int value = grayscaleSlider->GetValue();
+        onApplyGrayscale(value);
+    });
+}
+
 void EditorPanel::onApplyLightenDarken(int adjustment) {
     if (mainImage.empty()) {
         wxMessageBox("No image loaded.");
@@ -389,12 +420,30 @@ void EditorPanel::onApplyCanny(long lowThreshold, long highThreshold, int kernel
     }
 }
 
-/*
-void EditorPanel::onApplyOpenCVFunction() {
-    //Soit faire cv::Mat newImage = cv::AppliquerFonction(parametres)
-    //mainImage = newImage;
-    //Soit mainImage = cv::AppliquerFonction(params)
+void EditorPanel::onApplyGrayscale(int numLevels) {
+    if (mainImage.empty()) {
+        wxMessageBox("No image loaded.");
+        return;
+    }
+
+    mainImage = originalImage.clone();
+
+
+    int levelRange = 255 / numLevels;
+
+    for (int i = 0; i < mainImage.rows; i++) {
+        for (int j = 0; j < mainImage.cols; j++) {
+            auto& pixel = mainImage.at<cv::Vec3b>(i, j);
+            uchar Y = (pixel[0] + pixel[1] + pixel[2]) / 3;
+            int newY = (Y / levelRange) * levelRange;
+            if (newY > 255) {
+                newY = 255;
+            }
+            pixel[0] = pixel[1] = pixel[2] = cv::saturate_cast<uchar>(newY);
+        }
+    }
+
     displayMainImageToPanel();
 }
- */
+
 
