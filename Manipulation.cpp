@@ -4,6 +4,7 @@
 
 #include "Manipulation.h"
 
+//Conversion of OpenCV image to Wximage since they use different image format
 wxImage cvMatToWxImage(const cv::Mat& mat)
 {
     wxImage img(mat.cols, mat.rows);
