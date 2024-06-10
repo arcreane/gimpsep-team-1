@@ -163,19 +163,16 @@ void EditorPanel::createLightenDarkenSubmenu() {
 
     auto* sizer = new wxBoxSizer(wxVERTICAL);
     sizer->Add(text, 0, wxALL, 5);
-    sizer->Add(brightnessSlider, 0, wxEXPAND | wxALL, 5);
 
     wxButton* confirmButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Confirm"));
     wxButton* cancelButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Cancel"));
 
-    sizer->Add(text, 0, wxALL, 5);
     sizer->Add(brightnessSlider, 0, wxEXPAND | wxALL, 5);
     sizer->Add(confirmButton, 0, wxALL | wxEXPAND, 5);
     sizer->Add(cancelButton, 0, wxALL | wxEXPAND, 5);
 
     subMenuPanel->SetSizer(sizer);
     subMenuPanel->Layout();
-
 
     brightnessSlider->Bind(wxEVT_COMMAND_SLIDER_UPDATED, [this, brightnessSlider](wxCommandEvent& event) {
         int value = brightnessSlider->GetValue();
@@ -380,7 +377,6 @@ void EditorPanel::createBlackWhiteSubmenu() {
     // Creates UI elements for the black and white conversion sub-menu
     wxStaticText* text = new wxStaticText(subMenuPanel, wxID_ANY, wxT("Adjust Black and White Intensity (0 to 255)"));
     wxSlider* bwSlider = new wxSlider(subMenuPanel, wxID_ANY, 128, 0, 255, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
-    wxStaticText* sliderValueDisplay = new wxStaticText(subMenuPanel, wxID_ANY, wxT("128"), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER_HORIZONTAL);
 
     wxButton* confirmButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Confirm"));
     wxButton* cancelButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Cancel"));
@@ -388,7 +384,6 @@ void EditorPanel::createBlackWhiteSubmenu() {
     wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
     sizer->Add(text, 0, wxALL, 5);
     sizer->Add(bwSlider, 0, wxEXPAND | wxALL, 5);
-    sizer->Add(sliderValueDisplay, 0, wxALL | wxEXPAND, 5);
     sizer->Add(confirmButton, 0, wxALL | wxEXPAND, 5);
     sizer->Add(cancelButton, 0, wxALL | wxEXPAND, 5);
 
@@ -396,9 +391,8 @@ void EditorPanel::createBlackWhiteSubmenu() {
     subMenuPanel->Layout();
 
     // Binds events for the black and white slider
-    bwSlider->Bind(wxEVT_COMMAND_SLIDER_UPDATED, [this, bwSlider, sliderValueDisplay](wxCommandEvent& event) {
+    bwSlider->Bind(wxEVT_COMMAND_SLIDER_UPDATED, [this, bwSlider](wxCommandEvent& event) {
         int value = bwSlider->GetValue();
-        sliderValueDisplay->SetLabel(wxString::Format(wxT("%d"), value));
         onApplyBlackWhite(value); // Apply changes in real-time
     });
 
