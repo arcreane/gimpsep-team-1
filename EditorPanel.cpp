@@ -156,16 +156,15 @@ void EditorPanel::createLightenDarkenSubmenu() {
 
     subMenuPanel->DestroyChildren(); // Clears existing sub-menu content
 
-
-  // Creates UI elements for the brightness adjustment sub-menu
+    // Creates UI elements for the brightness adjustment sub-menu
     auto* text = new wxStaticText(subMenuPanel, wxID_ANY, wxT("Adjust Brightness (-100 to +100)"));
     auto* brightnessSlider = new wxSlider(subMenuPanel, wxID_ANY, 0, -100, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
 
     auto* sizer = new wxBoxSizer(wxVERTICAL);
     sizer->Add(text, 0, wxALL, 5);
 
-    wxButton* confirmButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Confirm"));
-    wxButton* cancelButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Cancel"));
+    auto* confirmButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Confirm"));
+    auto* cancelButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Cancel"));
 
     sizer->Add(brightnessSlider, 0, wxEXPAND | wxALL, 5);
     sizer->Add(confirmButton, 0, wxALL | wxEXPAND, 5);
@@ -207,8 +206,8 @@ void EditorPanel::createErodeDilateSubmenu() {
     auto* kernelSizeSlider = new wxSlider(subMenuPanel, wxID_ANY, 3, 1, 21, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
 
     auto* sizer = new wxBoxSizer(wxVERTICAL);
-    wxButton* confirmButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Confirm"));
-    wxButton* cancelButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Cancel"));
+    auto* confirmButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Confirm"));
+    auto* cancelButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Cancel"));
 
     sizer->Add(text, 0, wxALL, 5);
     sizer->Add(erodeRadioButton, 0, wxALL, 5);
@@ -250,16 +249,16 @@ void EditorPanel::createResizeSubmenu() {
 
 
     // Creates UI elements for the resize sub-menu
-    wxStaticText* text = new wxStaticText(subMenuPanel, wxID_ANY, wxT("Resize Options"));
-    wxRadioButton* factorRadioButton = new wxRadioButton(subMenuPanel, wxID_ANY, wxT("Resize by Factor"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
-    wxRadioButton* dimensionsRadioButton = new wxRadioButton(subMenuPanel, wxID_ANY, wxT("Resize by Dimensions"));
+    auto* text = new wxStaticText(subMenuPanel, wxID_ANY, wxT("Resize Options"));
+    auto* factorRadioButton = new wxRadioButton(subMenuPanel, wxID_ANY, wxT("Resize by Factor"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
+    auto* dimensionsRadioButton = new wxRadioButton(subMenuPanel, wxID_ANY, wxT("Resize by Dimensions"));
 
-    wxSlider* factorSlider = new wxSlider(subMenuPanel, wxID_ANY, 1, 1, 10, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
-    wxTextCtrl* widthCtrl = new wxTextCtrl(subMenuPanel, wxID_ANY);
-    wxTextCtrl* heightCtrl = new wxTextCtrl(subMenuPanel, wxID_ANY);
+    auto* factorSlider = new wxSlider(subMenuPanel, wxID_ANY, 1, 1, 10, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
+    auto* widthCtrl = new wxTextCtrl(subMenuPanel, wxID_ANY);
+    auto* heightCtrl = new wxTextCtrl(subMenuPanel, wxID_ANY);
 
-    wxButton* confirmButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Confirm"));
-    wxButton* cancelButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Cancel"));
+    auto* confirmButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Confirm"));
+    auto* cancelButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Cancel"));
 
     auto* sizer = new wxBoxSizer(wxVERTICAL);
     sizer->Add(text, 0, wxALL, 5);
@@ -318,15 +317,15 @@ void EditorPanel::createCannySubmenu() {
     subMenuPanel->DestroyChildren(); // Clears existing sub-menu content
 
     // Creates UI elements for the Canny edge detection sub-menu
-    wxStaticText* text = new wxStaticText(subMenuPanel, wxID_ANY, wxT("Canny Edge Detection"));
-    wxTextCtrl* lowThresholdCtrl = new wxTextCtrl(subMenuPanel, wxID_ANY);
-    wxTextCtrl* highThresholdCtrl = new wxTextCtrl(subMenuPanel, wxID_ANY);
-    wxSlider* kernelSizeSlider = new wxSlider(subMenuPanel, wxID_ANY, 3, 1, 7, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
+    auto* text = new wxStaticText(subMenuPanel, wxID_ANY, wxT("Canny Edge Detection"));
+    auto* lowThresholdCtrl = new wxTextCtrl(subMenuPanel, wxID_ANY);
+    auto* highThresholdCtrl = new wxTextCtrl(subMenuPanel, wxID_ANY);
+    auto* kernelSizeSlider = new wxSlider(subMenuPanel, wxID_ANY, 3, 1, 7, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
 
-    wxButton* confirmButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Confirm"));
-    wxButton* cancelButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Cancel"));
+    auto* confirmButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Confirm"));
+    auto* cancelButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Cancel"));
 
-    wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+    auto* sizer = new wxBoxSizer(wxVERTICAL);
 
     sizer->Add(text, 0, wxALL, 5);
     sizer->Add(new wxStaticText(subMenuPanel, wxID_ANY, wxT("Low Threshold")), 0, wxALL, 5);
@@ -375,13 +374,13 @@ void EditorPanel::createBlackWhiteSubmenu() {
     subMenuPanel->DestroyChildren(); // Clears existing sub-menu content
 
     // Creates UI elements for the black and white conversion sub-menu
-    wxStaticText* text = new wxStaticText(subMenuPanel, wxID_ANY, wxT("Adjust Black and White Intensity (0 to 255)"));
-    wxSlider* bwSlider = new wxSlider(subMenuPanel, wxID_ANY, 128, 0, 255, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
+    auto* text = new wxStaticText(subMenuPanel, wxID_ANY, wxT("Adjust Black and White Intensity (0 to 255)"));
+    auto* bwSlider = new wxSlider(subMenuPanel, wxID_ANY, 128, 0, 255, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
 
-    wxButton* confirmButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Confirm"));
-    wxButton* cancelButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Cancel"));
+    auto* confirmButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Confirm"));
+    auto* cancelButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Cancel"));
 
-    wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+    auto* sizer = new wxBoxSizer(wxVERTICAL);
     sizer->Add(text, 0, wxALL, 5);
     sizer->Add(bwSlider, 0, wxEXPAND | wxALL, 5);
     sizer->Add(confirmButton, 0, wxALL | wxEXPAND, 5);
@@ -422,6 +421,12 @@ void EditorPanel::createGrayscaleSubmenu() {
     sizer->Add(text, 0, wxALL, 5);
     sizer->Add(grayscaleSlider, 0, wxEXPAND | wxALL, 5);
 
+    auto* confirmButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Confirm"));
+    auto* cancelButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Cancel"));
+    sizer->Add(confirmButton, 0, wxALL | wxEXPAND, 5);
+    sizer->Add(cancelButton, 0, wxALL | wxEXPAND, 5);
+
+
     subMenuPanel->SetSizer(sizer);
     subMenuPanel->Layout();
 
@@ -429,6 +434,17 @@ void EditorPanel::createGrayscaleSubmenu() {
         int value = grayscaleSlider->GetValue();
         onApplyGrayscale(value);
     });
+
+    confirmButton->Bind(wxEVT_BUTTON, [this](wxCommandEvent& event) {
+        originalImage = mainImage.clone(); // Confirm changes
+        wxMessageBox("Your modifications have been updated", "Confirmation", wxOK | wxICON_INFORMATION);
+    });
+
+    cancelButton->Bind(wxEVT_BUTTON, [this](wxCommandEvent& event) {
+        mainImage = originalImage.clone(); // Revert changes
+        displayMainImageToPanel();
+    });
+
 }
 
 
