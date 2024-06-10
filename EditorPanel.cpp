@@ -387,7 +387,7 @@ void EditorPanel::createBlackWhiteSubmenu() {
     bwSlider->Bind(wxEVT_COMMAND_SLIDER_UPDATED, [this, bwSlider, sliderValueDisplay](wxCommandEvent& event) {
         int value = bwSlider->GetValue();
         sliderValueDisplay->SetLabel(wxString::Format(wxT("%d"), value));
-        onApplyBlackWhite(value);
+        onApplyBlackWhite(value); // Apply changes in real-time
     });
 
     confirmButton->Bind(wxEVT_BUTTON, [this](wxCommandEvent& event) {
@@ -510,7 +510,7 @@ void EditorPanel::onApplyBlackWhite(int intensity) {
         return;
     }
     cv::Mat grayImage;
-    cv::cvtColor(mainImage, grayImage, cv::COLOR_BGR2GRAY); // Converts to grayscale
+    cv::cvtColor(originalImage, grayImage, cv::COLOR_BGR2GRAY); // Converts to grayscale
     cv::Mat bwImage;
     cv::threshold(grayImage, bwImage, intensity, 255, cv::THRESH_BINARY); // Apply threshold to create black and white image
 
