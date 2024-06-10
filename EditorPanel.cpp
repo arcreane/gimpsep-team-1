@@ -1,12 +1,11 @@
 #include "EditorPanel.h"
-#include "MainFrame.h"
 #include "Manipulation.h"
 #include <opencv2/imgproc/imgproc.hpp>
 
 // Initializes the elements of the graphical interface and organizes the different panels
 EditorPanel::EditorPanel(wxWindow* parent) : wxPanel(parent, wxID_ANY) {
 
-    wxBoxSizer* mainSizer = new wxBoxSizer(wxHORIZONTAL);
+    auto* mainSizer = new wxBoxSizer(wxHORIZONTAL);
 
     // Creates the menu panel and sets its background color
     menuPanel = new wxPanel(this, wxID_ANY);
@@ -40,17 +39,19 @@ EditorPanel::EditorPanel(wxWindow* parent) : wxPanel(parent, wxID_ANY) {
     SetSizer(mainSizer);
     SetSizeHints(wxDefaultSize, wxDefaultSize, wxSize(1200, 600));
 
-    SetBackgroundColour(*wxWHITE);
 }
 
 // Loads an image and saves it to get back the original settings
-void EditorPanel::setImage(cv::Mat inImage) {
+void EditorPanel::setImage(const cv::Mat& inImage) {
     mainImage = inImage;
     originalImage = inImage.clone(); // Saves the original image
     displayMainImageToPanel();
 }
 
-// Displays the main image
+cv::Mat EditorPanel::getImage() {
+    return mainImage;
+}
+
 void EditorPanel::displayMainImageToPanel() {
     wxImage image = cvMatToWxImage(mainImage); // Converts the OpenCV image to wxImage
 
@@ -73,35 +74,42 @@ void EditorPanel::displayMainImageToPanel() {
     imagePanel->Layout();
 }
 
-// Creates the buttons in the menu
-wxGridSizer* EditorPanel::createButtonGrid() {
-    wxGridSizer* buttonGrid = new wxGridSizer(3, 3, 1, 1); // 3x3 grid with 1 pixel spacing
 
-    // Creates and adds each button to the grid, binding their click events
-    wxButton* button1 = new wxButton(menuPanel, wxID_ANY, wxT("Lighten/Darken"));
+wxGridSizer * EditorPanel::createButtonGrid() {
+
+    auto* buttonGrid = new wxGridSizer(3, 3, 1, 1);
+
+    auto* button1 = new wxButton(menuPanel, wxID_ANY, wxT("Lighten/Darken"));
+
     int button1ID = 1;
-    buttonGrid->Add(button1, 0, wxALL, 5);
+    buttonGrid->Add(button1, 0, wxEXPAND | wxALL, 3);
     button1->Bind(wxEVT_BUTTON, [this, button1ID](wxCommandEvent& event) { onButtonClicked(event, button1ID); });
 
-    wxButton* button2 = new wxButton(menuPanel, wxID_ANY, wxT("Erode/Dilate"));
+    auto* button2 = new wxButton(menuPanel, wxID_ANY, wxT("Erode/Dilate"));
     int button2ID = 2;
-    buttonGrid->Add(button2, 0, wxALL, 5);
+    buttonGrid->Add(button2, 0, wxEXPAND | wxALL, 3);
     button2->Bind(wxEVT_BUTTON, [this, button2ID](wxCommandEvent& event) { onButtonClicked(event, button2ID); });
 
-    wxButton* button3 = new wxButton(menuPanel, wxID_ANY, wxT("Resize"));
+    auto* button3 = new wxButton(menuPanel, wxID_ANY, wxT("Resize"));
+
     int button3ID = 3;
-    buttonGrid->Add(button3, 0, wxALL, 5);
+    buttonGrid->Add(button3, 0, wxEXPAND | wxALL, 3);
     button3->Bind(wxEVT_BUTTON, [this, button3ID](wxCommandEvent& event) { onButtonClicked(event, button3ID); });
 
-    wxButton* button4 = new wxButton(menuPanel, wxID_ANY, wxT("Canny"));
+    auto* button4 = new wxButton(menuPanel, wxID_ANY, wxT("Canny edge\ndetection"));
     int button4ID = 4;
-    buttonGrid->Add(button4, 0, wxALL, 5);
+    buttonGrid->Add(button4, 0, wxEXPAND | wxALL, 3);
     button4->Bind(wxEVT_BUTTON, [this, button4ID](wxCommandEvent& event) { onButtonClicked(event, button4ID); });
 
-    wxButton* button5 = new wxButton(menuPanel, wxID_ANY, wxT("Black and white"));
+    auto* button5 = new wxButton(menuPanel, wxID_ANY, wxT("Grayscale"));
     int button5ID = 5;
-    buttonGrid->Add(button5, 0, wxALL, 5);
+    buttonGrid->Add(button5, 0, wxEXPAND | wxALL, 3);
     button5->Bind(wxEVT_BUTTON, [this, button5ID](wxCommandEvent& event) { onButtonClicked(event, button5ID); });
+
+    auto* button6 = new wxButton(menuPanel, wxID_ANY, wxT("Black and white"));
+    int button6ID = 6;
+    buttonGrid->Add(button6, 0, wxEXPAND | wxALL, 3);
+    button6->Bind(wxEVT_BUTTON, [this, button6ID](wxCommandEvent& event) { onButtonClicked(event, button6ID); });
 
     return buttonGrid;
 }
@@ -133,6 +141,9 @@ void EditorPanel::onButtonClicked(wxCommandEvent &event, int buttonId) {
             createCannySubmenu();
             break;
         case 5:
+            createGrayscaleSubmenu();
+            break;
+      case 6:
             createBlackWhiteSubmenu();
             break;
         default:
@@ -149,14 +160,18 @@ void EditorPanel::createLightenDarkenSubmenu() {
 
     subMenuPanel->DestroyChildren(); // Clears existing sub-menu content
 
-    // Creates UI elements for the brightness adjustment sub-menu
-    wxStaticText* text = new wxStaticText(subMenuPanel, wxID_ANY, wxT("Adjust Brightness (-100 to +100)"));
-    wxSlider* brightnessSlider = new wxSlider(subMenuPanel, wxID_ANY, 0, -100, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
-    wxStaticText* sliderValueDisplay = new wxStaticText(subMenuPanel, wxID_ANY, wxT("0"), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER_HORIZONTAL);
+
+  // Creates UI elements for the brightness adjustment sub-menu
+    auto* text = new wxStaticText(subMenuPanel, wxID_ANY, wxT("Adjust Brightness (-100 to +100)"));
+    auto* brightnessSlider = new wxSlider(subMenuPanel, wxID_ANY, 0, -100, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
+
+    auto* sizer = new wxBoxSizer(wxVERTICAL);
+    sizer->Add(text, 0, wxALL, 5);
+    sizer->Add(brightnessSlider, 0, wxEXPAND | wxALL, 5);
 
     wxButton* confirmButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Confirm"));
     wxButton* cancelButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Cancel"));
-
+  
     wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
     sizer->Add(text, 0, wxALL, 5);
     sizer->Add(brightnessSlider, 0, wxEXPAND | wxALL, 5);
@@ -167,11 +182,11 @@ void EditorPanel::createLightenDarkenSubmenu() {
     subMenuPanel->SetSizer(sizer);
     subMenuPanel->Layout();
 
-    // Binds events for the brightness slider and buttons
-    brightnessSlider->Bind(wxEVT_COMMAND_SLIDER_UPDATED, [this, brightnessSlider, sliderValueDisplay](wxCommandEvent& event) {
+
+    brightnessSlider->Bind(wxEVT_COMMAND_SLIDER_UPDATED, [this, brightnessSlider](wxCommandEvent& event) {
         int value = brightnessSlider->GetValue();
-        sliderValueDisplay->SetLabel(wxString::Format(wxT("%d"), value));
-        onApplyLightenDarken(value); // Applies brightness adjustment in real-time
+        onApplyLightenDarken(value);
+
     });
 
     confirmButton->Bind(wxEVT_BUTTON, [this](wxCommandEvent& event) {
@@ -193,16 +208,19 @@ void EditorPanel::createErodeDilateSubmenu() {
 
     subMenuPanel->DestroyChildren(); // Clears existing sub-menu content
 
-    // Create UI elements for the erode/dilate sub-menu
-    wxStaticText* text = new wxStaticText(subMenuPanel, wxID_ANY, wxT("Erode / Dilate Options"));
-    wxRadioButton* erodeRadioButton = new wxRadioButton(subMenuPanel, wxID_ANY, wxT("Erode"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
-    wxRadioButton* dilateRadioButton = new wxRadioButton(subMenuPanel, wxID_ANY, wxT("Dilate"));
-    wxSlider* kernelSizeSlider = new wxSlider(subMenuPanel, wxID_ANY, 3, 1, 21, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
 
+  // Create UI elements for the erode/dilate sub-menu
+    auto* text = new wxStaticText(subMenuPanel, wxID_ANY, wxT("Erode / Dilate Options"));
+    auto* erodeRadioButton = new wxRadioButton(subMenuPanel, wxID_ANY, wxT("Erode"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
+    auto* dilateRadioButton = new wxRadioButton(subMenuPanel, wxID_ANY, wxT("Dilate"));
+    auto* kernelSizeSlider = new wxSlider(subMenuPanel, wxID_ANY, 3, 1, 21, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
+
+    auto* sizer = new wxBoxSizer(wxVERTICAL);
     wxButton* confirmButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Confirm"));
     wxButton* cancelButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Cancel"));
 
     wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+
     sizer->Add(text, 0, wxALL, 5);
     sizer->Add(erodeRadioButton, 0, wxALL, 5);
     sizer->Add(dilateRadioButton, 0, wxALL, 5);
@@ -241,6 +259,7 @@ void EditorPanel::createResizeSubmenu() {
 
     subMenuPanel->DestroyChildren(); // Clears existing sub-menu content
 
+
     // Creates UI elements for the resize sub-menu
     wxStaticText* text = new wxStaticText(subMenuPanel, wxID_ANY, wxT("Resize Options"));
     wxRadioButton* factorRadioButton = new wxRadioButton(subMenuPanel, wxID_ANY, wxT("Resize by Factor"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
@@ -253,7 +272,7 @@ void EditorPanel::createResizeSubmenu() {
     wxButton* confirmButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Confirm"));
     wxButton* cancelButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Cancel"));
 
-    wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+    auto* sizer = new wxBoxSizer(wxVERTICAL);
     sizer->Add(text, 0, wxALL, 5);
     sizer->Add(factorRadioButton, 0, wxALL, 5);
     sizer->Add(factorSlider, 0, wxEXPAND | wxALL, 5);
@@ -270,7 +289,7 @@ void EditorPanel::createResizeSubmenu() {
     menuPanel->Layout();
 
     // Binds events for the factor slider and text controls for real-time updates
-    factorSlider->Bind(wxEVT_SCROLL_THUMBTRACK, [this, factorRadioButton, widthCtrl, heightCtrl, factorSlider](wxScrollEvent& event) {
+    factorSlider->Bind(wxEVT_SCROLL_THUMBTRACK, [this, factorRadioButton, factorSlider](wxScrollEvent& event) {
         if (factorRadioButton->GetValue()) {
             onApplyResize(true, factorSlider->GetValue(), "", "");
         }
@@ -319,6 +338,7 @@ void EditorPanel::createCannySubmenu() {
     wxButton* cancelButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Cancel"));
 
     wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+
     sizer->Add(text, 0, wxALL, 5);
     sizer->Add(new wxStaticText(subMenuPanel, wxID_ANY, wxT("Low Threshold")), 0, wxALL, 5);
     sizer->Add(lowThresholdCtrl, 0, wxEXPAND | wxALL, 5);
@@ -400,6 +420,31 @@ void EditorPanel::createBlackWhiteSubmenu() {
         displayMainImageToPanel();
     });
 }
+
+
+void EditorPanel::createGrayscaleSubmenu() {
+    if (subMenuPanel == nullptr) {
+        return;
+    }
+
+    subMenuPanel->DestroyChildren();
+
+    auto* text = new wxStaticText(subMenuPanel, wxID_ANY, wxT("Set number or grayscale levels (2-21)"));
+    auto* grayscaleSlider = new wxSlider(subMenuPanel, wxID_ANY, 12, 2, 22, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
+
+    auto* sizer = new wxBoxSizer(wxVERTICAL);
+    sizer->Add(text, 0, wxALL, 5);
+    sizer->Add(grayscaleSlider, 0, wxEXPAND | wxALL, 5);
+
+    subMenuPanel->SetSizer(sizer);
+    subMenuPanel->Layout();
+
+    grayscaleSlider->Bind(wxEVT_COMMAND_SLIDER_UPDATED, [this, grayscaleSlider](wxCommandEvent& event) {
+        int value = grayscaleSlider->GetValue();
+        onApplyGrayscale(value);
+    });
+}
+
 
 // Adjusts the luminosity of the image
 void EditorPanel::onApplyLightenDarken(int adjustment) {
@@ -503,8 +548,31 @@ void EditorPanel::onApplyCanny(long lowThreshold, long highThreshold, int kernel
     }
 }
 
+
+void EditorPanel::onApplyGrayscale(int numLevels) {
+
+    mainImage = originalImage.clone();
+    int levelRange = 255 / numLevels;
+
+    for (int i = 0; i < mainImage.rows; i++) {
+        for (int j = 0; j < mainImage.cols; j++) {
+            auto& pixel = mainImage.at<cv::Vec3b>(i, j);
+            uchar Y = (pixel[0] + pixel[1] + pixel[2]) / 3;
+            int newY = (Y / levelRange) * levelRange;
+            if (newY > 255) {
+                newY = 255;
+            }
+            pixel[0] = pixel[1] = pixel[2] = cv::saturate_cast<uchar>(newY);
+        }
+    }
+
+    displayMainImageToPanel();
+}
+
+
 // Converts the image to black and white based on the specified intensity
 void EditorPanel::onApplyBlackWhite(int intensity) {
+
     if (mainImage.empty()) {
         wxMessageBox("No image loaded.");
         return;
@@ -525,3 +593,4 @@ void EditorPanel::onApplyOpenCVFunction() {
     // Or mainImage = cv::AppliquerFonction(params)
     displayMainImageToPanel();
 }
+

@@ -21,24 +21,24 @@ class EditorPanel : public wxPanel
     wxGridSizer * createButtonGrid();
 public:
     explicit EditorPanel(wxWindow* parent);
-    void setImage(cv::Mat);
+    void setImage(const cv::Mat&);
     cv::Mat getImage();
 
     void displayMainImageToPanel();
-
     void onButtonClicked(wxCommandEvent &event, int id);
 
     void createLightenDarkenSubmenu();
     void createErodeDilateSubmenu();
     void createResizeSubmenu();
     void createCannySubmenu();
+    void createGrayscaleSubmenu();
     void createBlackWhiteSubmenu();
 
     void onApplyLightenDarken(int adjustment);
-    void onApplyOpenCVFunction();
     void onApplyErodeDilate(bool erode, bool dilate, int kernelSize);
     void onApplyResize(bool resizeByFactor, int factor, const wxString& widthStr, const wxString& heightStr);
     void onApplyCanny(long lowThreshold, long highThreshold, int kernelSize);
+    void onApplyGrayscale(int numLevels);
     void onApplyBlackWhite(int intensity);
 };
 
