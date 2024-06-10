@@ -48,10 +48,6 @@ void EditorPanel::setImage(const cv::Mat& inImage) {
     displayMainImageToPanel();
 }
 
-cv::Mat EditorPanel::getImage() {
-    return mainImage;
-}
-
 void EditorPanel::displayMainImageToPanel() {
     wxImage image = cvMatToWxImage(mainImage); // Converts the OpenCV image to wxImage
 
@@ -171,11 +167,9 @@ void EditorPanel::createLightenDarkenSubmenu() {
 
     wxButton* confirmButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Confirm"));
     wxButton* cancelButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Cancel"));
-  
-    wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+
     sizer->Add(text, 0, wxALL, 5);
     sizer->Add(brightnessSlider, 0, wxEXPAND | wxALL, 5);
-    sizer->Add(sliderValueDisplay, 0, wxALL | wxEXPAND, 5);
     sizer->Add(confirmButton, 0, wxALL | wxEXPAND, 5);
     sizer->Add(cancelButton, 0, wxALL | wxEXPAND, 5);
 
@@ -218,8 +212,6 @@ void EditorPanel::createErodeDilateSubmenu() {
     auto* sizer = new wxBoxSizer(wxVERTICAL);
     wxButton* confirmButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Confirm"));
     wxButton* cancelButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Cancel"));
-
-    wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
 
     sizer->Add(text, 0, wxALL, 5);
     sizer->Add(erodeRadioButton, 0, wxALL, 5);
@@ -586,11 +578,5 @@ void EditorPanel::onApplyBlackWhite(int intensity) {
     displayMainImageToPanel(); // Updates the displayed image
 }
 
-// Updates the displayed image after applying an OpenCV function
-void EditorPanel::onApplyOpenCVFunction() {
-    // Either use cv::Mat newImage = cv::AppliquerFonction(parametres)
-    // mainImage = newImage;
-    // Or mainImage = cv::AppliquerFonction(params)
-    displayMainImageToPanel();
-}
+
 
