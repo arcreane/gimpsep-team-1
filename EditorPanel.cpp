@@ -1,7 +1,3 @@
-//
-// Created by ghisl on 08/05/2024.
-// New branch 8 by Clémentine
-
 #include "EditorPanel.h"
 #include "MainFrame.h"
 #include "Manipulation.h"
@@ -42,8 +38,8 @@ EditorPanel::EditorPanel(wxWindow* parent) : wxPanel(parent, wxID_ANY) {
 
 void EditorPanel::setImage(cv::Mat inImage) {
     mainImage = inImage;
-    originalImage = inImage.clone(); // Clone l'image
-    displayMainImageToPanel(); // Afficher l'image
+    originalImage = inImage.clone();
+    displayMainImageToPanel();
 }
 
 void EditorPanel::displayMainImageToPanel() {
@@ -141,10 +137,15 @@ void EditorPanel::createLightenDarkenSubmenu() {
     wxSlider* brightnessSlider = new wxSlider(subMenuPanel, wxID_ANY, 0, -100, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
     wxStaticText* sliderValueDisplay = new wxStaticText(subMenuPanel, wxID_ANY, wxT("0"), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER_HORIZONTAL);
 
+    wxButton* confirmButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Confirm"));
+    wxButton* cancelButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Cancel"));
+
     wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
     sizer->Add(text, 0, wxALL, 5);
     sizer->Add(brightnessSlider, 0, wxEXPAND | wxALL, 5);
     sizer->Add(sliderValueDisplay, 0, wxALL | wxEXPAND, 5);
+    sizer->Add(confirmButton, 0, wxALL | wxEXPAND, 5);
+    sizer->Add(cancelButton, 0, wxALL | wxEXPAND, 5);
 
     subMenuPanel->SetSizer(sizer);
     subMenuPanel->Layout();
@@ -153,6 +154,15 @@ void EditorPanel::createLightenDarkenSubmenu() {
         int value = brightnessSlider->GetValue();
         sliderValueDisplay->SetLabel(wxString::Format(wxT("%d"), value));
         onApplyLightenDarken(value);
+    });
+
+    confirmButton->Bind(wxEVT_BUTTON, [this](wxCommandEvent& event) {
+        originalImage = mainImage.clone(); // Confirm changes
+    });
+
+    cancelButton->Bind(wxEVT_BUTTON, [this](wxCommandEvent& event) {
+        mainImage = originalImage.clone(); // Revert changes
+        displayMainImageToPanel();
     });
 }
 
@@ -168,11 +178,16 @@ void EditorPanel::createErodeDilateSubmenu() {
     wxRadioButton* dilateRadioButton = new wxRadioButton(subMenuPanel, wxID_ANY, wxT("Dilate"));
     wxSlider* kernelSizeSlider = new wxSlider(subMenuPanel, wxID_ANY, 3, 1, 21, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
 
+    wxButton* confirmButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Confirm"));
+    wxButton* cancelButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Cancel"));
+
     wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
     sizer->Add(text, 0, wxALL, 5);
     sizer->Add(erodeRadioButton, 0, wxALL, 5);
     sizer->Add(dilateRadioButton, 0, wxALL, 5);
     sizer->Add(kernelSizeSlider, 0, wxEXPAND | wxALL, 5);
+    sizer->Add(confirmButton, 0, wxALL | wxEXPAND, 5);
+    sizer->Add(cancelButton, 0, wxALL | wxEXPAND, 5);
 
     subMenuPanel->SetSizer(sizer);
     subMenuPanel->Layout();
@@ -185,6 +200,15 @@ void EditorPanel::createErodeDilateSubmenu() {
     kernelSizeSlider->Bind(wxEVT_SCROLL_THUMBTRACK, updateFunction);
     erodeRadioButton->Bind(wxEVT_RADIOBUTTON, updateFunction);
     dilateRadioButton->Bind(wxEVT_RADIOBUTTON, updateFunction);
+
+    confirmButton->Bind(wxEVT_BUTTON, [this](wxCommandEvent& event) {
+        originalImage = mainImage.clone(); // Confirm changes
+    });
+
+    cancelButton->Bind(wxEVT_BUTTON, [this](wxCommandEvent& event) {
+        mainImage = originalImage.clone(); // Revert changes
+        displayMainImageToPanel();
+    });
 }
 
 void EditorPanel::createResizeSubmenu() {
@@ -201,7 +225,9 @@ void EditorPanel::createResizeSubmenu() {
     wxSlider* factorSlider = new wxSlider(subMenuPanel, wxID_ANY, 1, 1, 10, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
     wxTextCtrl* widthCtrl = new wxTextCtrl(subMenuPanel, wxID_ANY);
     wxTextCtrl* heightCtrl = new wxTextCtrl(subMenuPanel, wxID_ANY);
-    wxButton* applyButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Apply"));
+
+    wxButton* confirmButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Confirm"));
+    wxButton* cancelButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Cancel"));
 
     wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
     sizer->Add(text, 0, wxALL, 5);
@@ -212,7 +238,8 @@ void EditorPanel::createResizeSubmenu() {
     sizer->Add(widthCtrl, 0, wxEXPAND | wxALL, 5);
     sizer->Add(new wxStaticText(subMenuPanel, wxID_ANY, wxT("Height")), 0, wxALL, 5);
     sizer->Add(heightCtrl, 0, wxEXPAND | wxALL, 5);
-    sizer->Add(applyButton, 0, wxALL, 5);
+    sizer->Add(confirmButton, 0, wxALL | wxEXPAND, 5);
+    sizer->Add(cancelButton, 0, wxALL | wxEXPAND, 5);
 
     subMenuPanel->SetSizer(sizer);
     subMenuPanel->Layout();
@@ -236,8 +263,14 @@ void EditorPanel::createResizeSubmenu() {
         }
     });
 
-    applyButton->Bind(wxEVT_BUTTON, [this, factorRadioButton, factorSlider, widthCtrl, heightCtrl](wxCommandEvent& event) {
+    confirmButton->Bind(wxEVT_BUTTON, [this, factorRadioButton, factorSlider, widthCtrl, heightCtrl](wxCommandEvent& event) {
         onApplyResize(factorRadioButton->GetValue(), factorSlider->GetValue(), widthCtrl->GetValue(), heightCtrl->GetValue());
+        originalImage = mainImage.clone(); // Confirm changes
+    });
+
+    cancelButton->Bind(wxEVT_BUTTON, [this](wxCommandEvent& event) {
+        mainImage = originalImage.clone(); // Revert changes
+        displayMainImageToPanel();
     });
 }
 
@@ -253,6 +286,9 @@ void EditorPanel::createCannySubmenu() {
     wxTextCtrl* highThresholdCtrl = new wxTextCtrl(subMenuPanel, wxID_ANY);
     wxSlider* kernelSizeSlider = new wxSlider(subMenuPanel, wxID_ANY, 3, 1, 7, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
 
+    wxButton* confirmButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Confirm"));
+    wxButton* cancelButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Cancel"));
+
     wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
     sizer->Add(text, 0, wxALL, 5);
     sizer->Add(new wxStaticText(subMenuPanel, wxID_ANY, wxT("Low Threshold")), 0, wxALL, 5);
@@ -261,6 +297,8 @@ void EditorPanel::createCannySubmenu() {
     sizer->Add(highThresholdCtrl, 0, wxEXPAND | wxALL, 5);
     sizer->Add(new wxStaticText(subMenuPanel, wxID_ANY, wxT("Kernel Size (Only odd values)")), 0, wxALL, 5);
     sizer->Add(kernelSizeSlider, 0, wxEXPAND | wxALL, 5);
+    sizer->Add(confirmButton, 0, wxALL | wxEXPAND, 5);
+    sizer->Add(cancelButton, 0, wxALL | wxEXPAND, 5);
 
     subMenuPanel->SetSizer(sizer);
     subMenuPanel->Layout();
@@ -275,30 +313,17 @@ void EditorPanel::createCannySubmenu() {
         onApplyCanny(wxAtol(lowThresholdCtrl->GetValue()), wxAtol(highThresholdCtrl->GetValue()), kernelSizeSlider->GetValue());
     });
 
-    lowThresholdCtrl->Bind(wxEVT_TEXT, [this, lowThresholdCtrl, highThresholdCtrl, kernelSizeSlider](wxCommandEvent& event) {
-        long lowThreshold = wxAtol(lowThresholdCtrl->GetValue());
-        long highThreshold = wxAtol(highThresholdCtrl->GetValue());
-        if (lowThreshold == 0 && highThreshold == 0) {
-            // Reload original image if both thresholds are set to zero
-            mainImage = originalImage.clone(); // Ensure you have a way to access the original image
-        } else {
-            onApplyCanny(lowThreshold, highThreshold, kernelSizeSlider->GetValue());
-        }
-    });
-
-    highThresholdCtrl->Bind(wxEVT_TEXT, [this, lowThresholdCtrl, highThresholdCtrl, kernelSizeSlider](wxCommandEvent& event) {
-        long lowThreshold = wxAtol(lowThresholdCtrl->GetValue());
-        long highThreshold = wxAtol(highThresholdCtrl->GetValue());
-        if (lowThreshold == 0 && highThreshold == 0) {
-            // Reload original image if both thresholds are set to zero
-            mainImage = originalImage.clone(); // Ensure you have a way to access the original image
-        } else {
-            onApplyCanny(lowThreshold, highThreshold, kernelSizeSlider->GetValue());
-        }
-    });
-
     kernelSizeSlider->Bind(wxEVT_SCROLL_THUMBTRACK, [this, lowThresholdCtrl, highThresholdCtrl, kernelSizeSlider](wxScrollEvent& event) {
         onApplyCanny(wxAtol(lowThresholdCtrl->GetValue()), wxAtol(highThresholdCtrl->GetValue()), kernelSizeSlider->GetValue());
+    });
+
+    confirmButton->Bind(wxEVT_BUTTON, [this](wxCommandEvent& event) {
+        originalImage = mainImage.clone(); // Confirm changes
+    });
+
+    cancelButton->Bind(wxEVT_BUTTON, [this](wxCommandEvent& event) {
+        mainImage = originalImage.clone(); // Revert changes
+        displayMainImageToPanel();
     });
 }
 
@@ -313,10 +338,15 @@ void EditorPanel::createBlackWhiteSubmenu() {
     wxSlider* bwSlider = new wxSlider(subMenuPanel, wxID_ANY, 128, 0, 255, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
     wxStaticText* sliderValueDisplay = new wxStaticText(subMenuPanel, wxID_ANY, wxT("128"), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER_HORIZONTAL);
 
+    wxButton* confirmButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Confirm"));
+    wxButton* cancelButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Cancel"));
+
     wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
     sizer->Add(text, 0, wxALL, 5);
     sizer->Add(bwSlider, 0, wxEXPAND | wxALL, 5);
     sizer->Add(sliderValueDisplay, 0, wxALL | wxEXPAND, 5);
+    sizer->Add(confirmButton, 0, wxALL | wxEXPAND, 5);
+    sizer->Add(cancelButton, 0, wxALL | wxEXPAND, 5);
 
     subMenuPanel->SetSizer(sizer);
     subMenuPanel->Layout();
@@ -325,6 +355,15 @@ void EditorPanel::createBlackWhiteSubmenu() {
         int value = bwSlider->GetValue();
         sliderValueDisplay->SetLabel(wxString::Format(wxT("%d"), value));
         onApplyBlackWhite(value);
+    });
+
+    confirmButton->Bind(wxEVT_BUTTON, [this](wxCommandEvent& event) {
+        originalImage = mainImage.clone(); // Confirm changes
+    });
+
+    cancelButton->Bind(wxEVT_BUTTON, [this](wxCommandEvent& event) {
+        mainImage = originalImage.clone(); // Revert changes
+        displayMainImageToPanel();
     });
 }
 
