@@ -176,6 +176,7 @@ void EditorPanel::createLightenDarkenSubmenu() {
 
     confirmButton->Bind(wxEVT_BUTTON, [this](wxCommandEvent& event) {
         originalImage = mainImage.clone(); // Confirms changes
+        wxMessageBox("Your modifications have been updated", "Confirmation", wxOK | wxICON_INFORMATION);
     });
 
     cancelButton->Bind(wxEVT_BUTTON, [this](wxCommandEvent& event) {
@@ -223,6 +224,7 @@ void EditorPanel::createErodeDilateSubmenu() {
 
     confirmButton->Bind(wxEVT_BUTTON, [this](wxCommandEvent& event) {
         originalImage = mainImage.clone(); // Confirms changes
+        wxMessageBox("Your modifications have been updated", "Confirmation", wxOK | wxICON_INFORMATION);
     });
 
     cancelButton->Bind(wxEVT_BUTTON, [this](wxCommandEvent& event) {
@@ -290,6 +292,7 @@ void EditorPanel::createResizeSubmenu() {
     confirmButton->Bind(wxEVT_BUTTON, [this, factorRadioButton, factorSlider, widthCtrl, heightCtrl](wxCommandEvent& event) {
         onApplyResize(factorRadioButton->GetValue(), factorSlider->GetValue(), widthCtrl->GetValue(), heightCtrl->GetValue());
         originalImage = mainImage.clone(); // Confirms changes
+        wxMessageBox("Your modifications have been updated", "Confirmation", wxOK | wxICON_INFORMATION);
     });
 
     cancelButton->Bind(wxEVT_BUTTON, [this](wxCommandEvent& event) {
@@ -345,6 +348,7 @@ void EditorPanel::createCannySubmenu() {
 
     confirmButton->Bind(wxEVT_BUTTON, [this](wxCommandEvent& event) {
         originalImage = mainImage.clone(); // Confirm changes
+        wxMessageBox("Your modifications have been updated", "Confirmation", wxOK | wxICON_INFORMATION);
     });
 
     cancelButton->Bind(wxEVT_BUTTON, [this](wxCommandEvent& event) {
@@ -388,6 +392,7 @@ void EditorPanel::createBlackWhiteSubmenu() {
 
     confirmButton->Bind(wxEVT_BUTTON, [this](wxCommandEvent& event) {
         originalImage = mainImage.clone(); // Confirm changes
+        wxMessageBox("Your modifications have been updated", "Confirmation", wxOK | wxICON_INFORMATION);
     });
 
     cancelButton->Bind(wxEVT_BUTTON, [this](wxCommandEvent& event) {
