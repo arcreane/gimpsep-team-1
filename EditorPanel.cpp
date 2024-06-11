@@ -374,7 +374,7 @@ void EditorPanel::createBlackWhiteSubmenu() {
     subMenuPanel->DestroyChildren(); // Clears existing sub-menu content
 
     // Creates UI elements for the black and white conversion sub-menu
-    auto* text = new wxStaticText(subMenuPanel, wxID_ANY, wxT("Adjust Black and White Intensity (0 to 255)"));
+    auto* text = new wxStaticText(subMenuPanel, wxID_ANY, wxT("Adjust White (0) and Black (255) Intensity (0 to 255)"));
     auto* bwSlider = new wxSlider(subMenuPanel, wxID_ANY, 128, 0, 255, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
 
     auto* confirmButton = new wxButton(subMenuPanel, wxID_ANY, wxT("Confirm"));
